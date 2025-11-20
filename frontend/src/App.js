@@ -466,7 +466,7 @@ function JobStatusPage() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Job Status</div>
+          <div className="app-header-title">Your ProBridge job</div>
         </div>
       </header>
       <main className="app-main">
