@@ -1078,6 +1078,7 @@ function OperatorDashboard() {
 // ------------------------
 
 function ContractorWelcomePage() {
+  // Join ProBridge landing screen for contractors
   const navigate = useNavigate();
   return (
     <div className="app-shell" data-testid="contractor-welcome-page">
