@@ -160,7 +160,7 @@ function ClientHomePage() {
       <main className="app-main">
         <section>
           <div className="app-hero-title" data-testid="hero-main-title">
-            The Bridge connects you with trusted local pros.
+            ProBridge connects you with trusted local pros.
           </div>
           <p className="app-hero-subtitle" data-testid="hero-subtitle">
             Share a few details and we’ll route your request to a vetted contractor.
