@@ -383,6 +383,11 @@ async def transition_job_status(
     return job
 
 
+# Helper to fetch contractor profile for a user
+async def get_contractor_profile_for_user(user_id: str) -> Optional[Dict[str, Any]]:
+    return await db.contractor_profiles.find_one({"user_id": user_id})
+
+
 # -------------------------------------------------
 # Event Handlers (simplified for v1)
 # -------------------------------------------------
@@ -405,6 +410,9 @@ async def on_job_created_handler(job: Job) -> None:
         await create_job_event(job.id, "no_contractor_found", "system", None, {})
         await notify_operator("operator_no_contractor_found", {"job_id": job.id})
         return
+
+    # Mark job as offering to contractors
+    await db.jobs.update_one({"id": job.id}, {"$set": {"status": "offering_contractors", "updated_at": datetime.now(timezone.utc)}})
 
     # Notify top N contractors
     top_n = 3
@@ -588,8 +596,8 @@ async def create_job(body: JobCreateRequest):
     return JobCreateResponse(job_id=job_id, status=job_doc["status"], client_view_token=client_view_token)
 
 
-@api_router.post("/jobs/{job_id}/status", response_model=JobStatusResponse)
-async def get_job_status(job_id: str, token: str = Body(..., embed=True)):
+@api_router.get("/jobs/{job_id}/status", response_model=JobStatusResponse)
+async def get_job_status(job_id: str, token: str):
     job_doc = await db.jobs.find_one({"id": job_id})
     if not job_doc:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -639,8 +647,8 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
     cfg = await get_app_config()
 
     domain = str(request.base_url).rstrip("/") if request else ""
-    success_url = f"{domain}/jobs/{job_id}/status"
-    cancel_url = f"{domain}/jobs/{job_id}/status"
+    success_url = f"{domain}/jobs/{job_id}/status?token={token}"
+    cancel_url = success_url
 
     # Create Stripe Checkout session
     session = stripe.checkout.Session.create(
@@ -688,7 +696,7 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
 
 
 # ---------------------------
-# Contractor routes (simplified v1)
+# Contractor routes
 # ---------------------------
 
 
@@ -770,8 +778,129 @@ async def contractor_signup(body: ContractorSignupRequest):
     return {"contractor_id": contractor_id}
 
 
+@api_router.get("/contractors/me/offers")
+async def contractor_offers(current_user: UserInDB = Depends(require_role("contractor"))):
+    profile = await get_contractor_profile_for_user(current_user.id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Contractor profile not found")
+
+    # Offers are derived from notifications of type contractor_new_offer
+    notifications = await db.notifications.find(
+        {
+            "recipient_type": "contractor",
+            "recipient_id": profile["id"],
+            "template_id": "contractor_new_offer",
+        },
+        {"_id": 0},
+    ).to_list(100)
+    job_ids = list({n["payload"].get("job_id") for n in notifications if n.get("payload")})
+    if not job_ids:
+        return []
+
+    jobs = await db.jobs.find(
+        {
+            "id": {"$in": job_ids},
+            "status": "offering_contractors",
+            "assigned_contractor_id": None,
+        },
+        {"_id": 0},
+    ).to_list(100)
+    return jobs
+
+
+@api_router.get("/contractors/me/jobs")
+async def contractor_jobs(current_user: UserInDB = Depends(require_role("contractor"))):
+    profile = await get_contractor_profile_for_user(current_user.id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Contractor profile not found")
+
+    jobs = await db.jobs.find(
+        {"assigned_contractor_id": profile["id"]},
+        {"_id": 0},
+    ).sort("created_at", -1).to_list(200)
+    return jobs
+
+
+class ContractorAcceptResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+
+
+@api_router.post("/contractors/offers/{job_id}/accept", response_model=ContractorAcceptResponse)
+async def accept_offer(job_id: str, current_user: UserInDB = Depends(require_role("contractor"))):
+    profile = await get_contractor_profile_for_user(current_user.id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Contractor profile not found")
+
+    job_doc = await db.jobs.find_one({"id": job_id})
+    if not job_doc:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = Job(**job_doc)
+    if job.assigned_contractor_id and job.assigned_contractor_id != profile["id"]:
+        # Already taken by someone else
+        await notify_contractor(profile["id"], "contractor_job_already_taken", {"job_id": job_id})
+        raise HTTPException(status_code=409, detail="Job already taken")
+
+    if job.status != "offering_contractors":
+        raise HTTPException(status_code=400, detail="Job is not currently being offered to contractors")
+
+    # Basic eligibility check: same city and service
+    if not (profile["city_id"] == job.city_id and job.service_category_id in profile.get("services", [])):
+        raise HTTPException(status_code=403, detail="This job is not offered to you")
+
+    # Assign contractor and move to awaiting_quote
+    await db.jobs.update_one(
+        {"id": job_id},
+        {"$set": {"assigned_contractor_id": profile["id"], "accepted_at": datetime.now(timezone.utc)}},
+    )
+    await create_job_event(job_id, "contractor_accepted", "contractor", current_user.id, {"contractor_id": profile["id"]})
+    updated = await transition_job_status(job_id, "awaiting_quote", "contractor", current_user.id)
+
+    await notify_operator("contractor_accepted", {"job_id": job_id, "contractor_id": profile["id"]})
+
+    return ContractorAcceptResponse(job_id=job_id, status=updated.status)
+
+
+class MarkCompleteRequest(BaseModel):
+    completion_note: Optional[str] = None
+    photos: Optional[List[str]] = None
+
+
+@api_router.post("/contractors/jobs/{job_id}/mark-complete")
+async def contractor_mark_complete(
+    job_id: str,
+    body: MarkCompleteRequest,
+    current_user: UserInDB = Depends(require_role("contractor")),
+):
+    profile = await get_contractor_profile_for_user(current_user.id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Contractor profile not found")
+
+    job_doc = await db.jobs.find_one({"id": job_id})
+    if not job_doc:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = Job(**job_doc)
+    if job.assigned_contractor_id != profile["id"]:
+        raise HTTPException(status_code=403, detail="You are not assigned to this job")
+
+    if job.status not in ("confirmed", "in_progress"):
+        raise HTTPException(status_code=400, detail="Job is not in a completable state")
+
+    await create_job_event(
+        job_id,
+        "job_completed",
+        "contractor",
+        current_user.id,
+        {"completion_note": body.completion_note, "photos": body.photos or []},
+    )
+    updated = await transition_job_status(job_id, "completed", "contractor", current_user.id)
+    return {"job_id": job_id, "status": updated.status}
+
+
 # ---------------------------
-# Operator basic routes
+# Operator routes
 # ---------------------------
 
 
@@ -882,6 +1011,114 @@ async def send_quote(
     await create_job_event(job_id, "quote_sent", "operator", current_user.id, {"quote_id": quote["id"]})
     await notify_client(job_id, "client_quote_ready", {"job_id": job_id, "quote_id": quote["id"]})
     return {"job_id": job_id, "quote_id": quote["id"]}
+
+
+class OperatorJobPatch(BaseModel):
+    status: Optional[JobStatus] = None
+    assigned_contractor_id: Optional[str] = None
+    internal_notes: Optional[str] = None
+
+
+@api_router.patch("/operator/jobs/{job_id}")
+async def operator_update_job(
+    job_id: str,
+    body: OperatorJobPatch,
+    current_user: UserInDB = Depends(require_role("operator", "admin")),
+):
+    _ = current_user
+    job_doc = await db.jobs.find_one({"id": job_id})
+    if not job_doc:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    updates: Dict[str, Any] = {}
+
+    if body.assigned_contractor_id is not None:
+        contractor = await db.contractor_profiles.find_one({"id": body.assigned_contractor_id})
+        if not contractor:
+            raise HTTPException(status_code=400, detail="Assigned contractor not found")
+        updates["assigned_contractor_id"] = body.assigned_contractor_id
+
+    if body.internal_notes is not None:
+        updates["internal_notes"] = body.internal_notes
+
+    if updates:
+        updates["updated_at"] = datetime.now(timezone.utc)
+        await db.jobs.update_one({"id": job_id}, {"$set": updates})
+
+    if body.status is not None:
+        await transition_job_status(job_id, body.status, "operator", current_user.id)
+
+    updated = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    return updated
+
+
+@api_router.get("/operator/contractors")
+async def operator_contractors(
+    city_slug: Optional[str] = None,
+    service_category_slug: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: UserInDB = Depends(require_role("operator", "admin")),
+):
+    _ = current_user
+
+    query: Dict[str, Any] = {}
+    if status:
+        query["status"] = status
+    if city_slug:
+        city = await db.cities.find_one({"slug": city_slug})
+        if city:
+            query["city_id"] = city["id"]
+    if service_category_slug:
+        cat = await db.service_categories.find_one({"slug": service_category_slug})
+        if cat:
+            query["services"] = cat["id"]
+
+    profiles = await db.contractor_profiles.find(query, {"_id": 0}).to_list(200)
+
+    # Attach simple city and services labels
+    cities = {c["id"]: c for c in await db.cities.find({}, {"_id": 0}).to_list(100)}
+    cats = {c["id"]: c for c in await db.service_categories.find({}, {"_id": 0}).to_list(100)}
+
+    def map_profile(p: Dict[str, Any]) -> Dict[str, Any]:
+        city = cities.get(p["city_id"])
+        service_labels = [cats[s]["display_name"] for s in p.get("services", []) if s in cats]
+        return {
+            "id": p["id"],
+            "public_name": p.get("public_name"),
+            "city": city.get("name") if city else None,
+            "service_labels": service_labels,
+            "status": p.get("status"),
+            "total_earnings_cents": p.get("total_earnings_cents", 0),
+            "completed_jobs_count": p.get("completed_jobs_count", 0),
+        }
+
+    return [map_profile(p) for p in profiles]
+
+
+@api_router.post("/operator/payouts/{payout_id}/mark-paid")
+async def mark_payout_paid(payout_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
+    _ = current_user
+    payout = await db.payouts.find_one({"id": payout_id})
+    if not payout:
+        raise HTTPException(status_code=404, detail="Payout not found")
+    if payout.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Payout already marked as paid")
+
+    now = datetime.now(timezone.utc)
+    await db.payouts.update_one(
+        {"id": payout_id},
+        {"$set": {"status": "paid", "paid_at": now}},
+    )
+
+    contractor_id = payout.get("contractor_id")
+    amount = int(payout.get("amount_cents", 0))
+    if contractor_id:
+        await db.contractor_profiles.update_one(
+            {"id": contractor_id},
+            {"$inc": {"completed_jobs_count": 1, "total_earnings_cents": amount}},
+        )
+
+    return {"payout_id": payout_id, "status": "paid"}
 
 
 # ---------------------------
