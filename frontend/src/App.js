@@ -70,7 +70,7 @@ function useAuth(roleKey) {
 }
 
 // ------------------------
-// Client: job request + status
+// Client: intake + status
 // ------------------------
 
 function ClientHomePage() {
@@ -88,6 +88,7 @@ function ClientHomePage() {
     client_email: "",
     is_test: false,
   });
+  const [otherDescription, setOtherDescription] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [statusLink, setStatusLink] = React.useState(null);
 
@@ -96,21 +97,42 @@ function ClientHomePage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const regularCategories = categories.filter((c) => c.slug !== "other");
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     try {
+      let finalServiceSlug = form.service_category_slug;
+      // For v1, map "Other" to the first listed category while appending details
+      if (form.service_category_slug === "other") {
+        finalServiceSlug = categories[0]?.slug || "";
+      }
+
+      let finalDescription = form.description;
+      if (form.service_category_slug === "other" && otherDescription.trim()) {
+        finalDescription = `${form.description}\n\nClient described an unlisted service: ${otherDescription.trim()}`;
+      }
+
       const payload = {
-        ...form,
+        city_slug: form.city_slug,
+        service_category_slug: finalServiceSlug,
+        title: form.title || undefined,
+        description: finalDescription,
+        zip: form.zip,
+        preferred_timing: form.preferred_timing,
+        client_name: form.client_name,
+        client_phone: form.client_phone,
         client_email: form.client_email || undefined,
+        is_test: form.is_test,
       };
       const res = await axios.post("/jobs", payload);
       const { job_id, client_view_token } = res.data;
       const link = `/jobs/${job_id}/status?token=${encodeURIComponent(client_view_token)}`;
       setStatusLink(link);
       toast({
-        title: "Request received",
-        description: "We logged your job. You can track it from the status link.",
+        title: "Thanks! We’ve received your request.",
+        description: "We’ll be in touch shortly.",
       });
     } catch (err) {
       console.error("Job create error", err);
@@ -123,32 +145,34 @@ function ClientHomePage() {
     }
   }
 
+  const selectedCityName =
+    cities.find((c) => c.slug === form.city_slug)?.name || "your area";
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <div className="app-header-title">The Bridge — Local Services</div>
-          <div className="app-tagline">A local operator routing trusted pros in your city.</div>
+          <div className="app-header-title">Request a service in {selectedCityName}</div>
+          <div className="app-tagline">Tell us about your project. We’re here to help!</div>
         </div>
-        <div className="app-header-badge">Albuquerque first · Built for multi-city</div>
       </header>
 
       <main className="app-main">
         <section>
           <div className="app-hero-title" data-testid="hero-main-title">
-            Local help, routed by a real human operator.
+            The Bridge connects you with trusted local pros.
           </div>
           <p className="app-hero-subtitle" data-testid="hero-subtitle">
-            Tell us what you need in a few fields. We&apos;ll match you with a vetted contractor and keep you updated from quote to completion.
+            Share a few details and we’ll route your request to a vetted contractor.
           </p>
           <div className="app-hero-chip-row">
             <span className="app-hero-chip" data-testid="chip-city">Starting in Albuquerque</span>
-            <span className="app-hero-chip" data-testid="chip-handyman">Handyman & cleaning first</span>
-            <span className="app-hero-chip" data-testid="chip-operator">Operator-managed quotes & dispatch</span>
+            <span className="app-hero-chip" data-testid="chip-handyman">Home services first</span>
+            <span className="app-hero-chip" data-testid="chip-operator">Operator-managed quotes & routing</span>
           </div>
 
           <div className="app-secondary-surface" data-testid="info-sandbox">
-            <strong>Sandbox-friendly.</strong> Flip on the test toggle in the form and your job is clearly marked as a test so it doesn&apos;t pollute real metrics.
+            <strong>Test request.</strong> You can mark this as a test at the bottom of the form if you’re just trying things out.
           </div>
         </section>
 
@@ -156,24 +180,23 @@ function ClientHomePage() {
           <div className="app-panel" data-testid="client-job-request-panel">
             <div className="app-panel-header">
               <div>
-                <div className="app-panel-title">Request local help</div>
-                <div className="app-panel-subtitle">Answer a few questions so we can route your job.</div>
+                <div className="app-panel-title">Service details</div>
+                <div className="app-panel-subtitle">We’ll use this to match you to the right pro.</div>
               </div>
-              <span className="app-badge-soft" data-testid="badge-response-time">Typical response in &lt; 15 minutes</span>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3" data-testid="job-request-form">
               <div className="app-input-row">
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="city" data-testid="label-city">
-                    City
+                    Select your city
                   </label>
                   <Select
                     onValueChange={(v) => onChange("city_slug")({ target: { value: v } })}
                     value={form.city_slug}
                   >
                     <SelectTrigger id="city" data-testid="input-city">
-                      <SelectValue placeholder={loading ? "Loading cities..." : "Choose city"} />
+                      <SelectValue placeholder={loading ? "Loading cities…" : "Choose your city…"} />
                     </SelectTrigger>
                     <SelectContent>
                       {cities.map((c) => (
@@ -187,34 +210,53 @@ function ClientHomePage() {
 
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="category" data-testid="label-category">
-                    Service category
+                    What kind of help do you need?
                   </label>
                   <Select
                     onValueChange={(v) => onChange("service_category_slug")({ target: { value: v } })}
                     value={form.service_category_slug}
                   >
                     <SelectTrigger id="category" data-testid="input-category">
-                      <SelectValue placeholder={loading ? "Loading categories..." : "Choose service"} />
+                      <SelectValue placeholder={loading ? "Loading services…" : "Pick a service…"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((s) => (
+                      {regularCategories.map((s) => (
                         <SelectItem key={s.id} value={s.slug} data-testid={`input-category-option-${s.slug}`}>
                           {s.display_name}
                         </SelectItem>
                       ))}
+                      <SelectItem value="other" data-testid="input-category-option-other">
+                        Other (describe below)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
+              {form.service_category_slug === "other" && (
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="other-desc" data-testid="label-other-description">
+                    Describe your request
+                  </label>
+                  <Textarea
+                    id="other-desc"
+                    rows={3}
+                    placeholder="Share what you need if it’s not listed above."
+                    value={otherDescription}
+                    onChange={(e) => setOtherDescription(e.target.value)}
+                    data-testid="input-other-description"
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="text-xs text-slate-600" htmlFor="title" data-testid="label-title">
-                  Short title (optional)
+                  Give your request a title (optional)
                 </label>
                 <Input
                   id="title"
                   data-testid="input-title"
-                  placeholder="e.g. Hang 2 shelves and a mirror"
+                  placeholder="e.g., Mount a TV"
                   value={form.title}
                   onChange={onChange("title")}
                 />
@@ -222,12 +264,12 @@ function ClientHomePage() {
 
               <div>
                 <label className="text-xs text-slate-600" htmlFor="description" data-testid="label-description">
-                  What do you need done?
+                  Describe the job
                 </label>
                 <Textarea
                   id="description"
                   data-testid="input-description"
-                  placeholder="Share enough detail for a clear quote — room, materials, constraints."
+                  placeholder="Provide any details our pros should know…"
                   rows={4}
                   value={form.description}
                   onChange={onChange("description")}
@@ -237,12 +279,12 @@ function ClientHomePage() {
               <div className="app-input-row">
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="zip" data-testid="label-zip">
-                    ZIP code
+                    Where are you located?
                   </label>
                   <Input
                     id="zip"
                     data-testid="input-zip"
-                    placeholder="e.g. 87101"
+                    placeholder="ZIP code or full address…"
                     value={form.zip}
                     onChange={onChange("zip")}
                   />
@@ -256,7 +298,7 @@ function ClientHomePage() {
                     value={form.preferred_timing}
                   >
                     <SelectTrigger id="timing" data-testid="input-preferred-timing">
-                      <SelectValue />
+                      <SelectValue placeholder="Pick a date or time range…" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="asap" data-testid="input-preferred-timing-asap">
@@ -276,11 +318,11 @@ function ClientHomePage() {
                 </div>
               </div>
 
-              <div className="app-divider-label">How can we reach you?</div>
+              <div className="app-divider-label">Contact information</div>
               <div className="app-input-row">
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="client_name" data-testid="label-client-name">
-                    Name
+                    Your name
                   </label>
                   <Input
                     id="client_name"
@@ -291,12 +333,12 @@ function ClientHomePage() {
                 </div>
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="client_phone" data-testid="label-client-phone">
-                    Mobile number
+                    Phone number
                   </label>
                   <Input
                     id="client_phone"
                     data-testid="input-client-phone"
-                    placeholder="We&apos;ll text scheduling details later."
+                    placeholder="We’ll send updates and a quote here."
                     value={form.client_phone}
                     onChange={onChange("client_phone")}
                   />
@@ -305,7 +347,7 @@ function ClientHomePage() {
 
               <div>
                 <label className="text-xs text-slate-600" htmlFor="client_email" data-testid="label-client-email">
-                  Email (optional, for receipts)
+                  Email address
                 </label>
                 <Input
                   id="client_email"
@@ -314,6 +356,9 @@ function ClientHomePage() {
                   value={form.client_email}
                   onChange={onChange("client_email")}
                 />
+                <p className="mt-1 text-[11px] text-slate-500" data-testid="contact-subtext">
+                  We’ll send updates and a quote here.
+                </p>
               </div>
 
               <div className="flex items-center justify-between gap-3 pt-1">
@@ -325,10 +370,10 @@ function ClientHomePage() {
                     className="h-3.5 w-3.5 rounded border-slate-300 bg-white"
                     data-testid="input-is-test-toggle"
                   />
-                  <span>This is a sandbox / test job</span>
+                  <span>Test request</span>
                 </label>
-                <span className="app-badge-soft-warm" data-testid="badge-no-app">
-                  No app to install, just a link.
+                <span className="text-[11px] text-slate-500" data-testid="sandbox-tooltip">
+                  Check this if you’re just trying out the system.
                 </span>
               </div>
 
@@ -338,7 +383,7 @@ function ClientHomePage() {
                   disabled={submitting}
                   data-testid="job-request-submit-button"
                 >
-                  {submitting ? "Submitting..." : "Send request"}
+                  {submitting ? "Submitting…" : "Submit my request"}
                 </Button>
 
                 {statusLink && (
@@ -351,10 +396,6 @@ function ClientHomePage() {
                   </a>
                 )}
               </div>
-
-              <p className="app-footer-note" data-testid="privacy-note">
-                We&apos;ll only use your contact info for this job and essential updates. Payment is handled securely via Stripe in test mode for now.
-              </p>
             </form>
           </div>
         </section>
@@ -417,12 +458,15 @@ function JobStatusPage() {
     }
   }
 
+  const isMatching = job && (job.status === "new" || job.status === "offering_contractors");
+  const hasQuoteReady = job && job.quote_status === "sent_to_client" && job.status === "quote_sent";
+  const isPaidOrConfirmed = job && (job.payment_status === "succeeded" || job.status === "confirmed");
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Job status</div>
-          <div className="app-tagline">Track this request from quote to payout.</div>
+          <div className="app-header-title">Job Status</div>
         </div>
       </header>
       <main className="app-main">
@@ -464,6 +508,13 @@ function JobStatusPage() {
                       </span>
                     )}
                   </div>
+
+                  {isMatching && (
+                    <p className="text-xs text-slate-600" data-testid="job-status-matching-copy">
+                      We’re matching your request with a trusted local pro…
+                    </p>
+                  )}
+
                   {job.quote_total_cents != null && (
                     <div className="border-t border-slate-200 pt-3 mt-2">
                       <div className="text-xs text-slate-500">Quote total</div>
@@ -472,19 +523,27 @@ function JobStatusPage() {
                       </div>
                     </div>
                   )}
-                  {job.quote_status === "sent_to_client" && job.status === "quote_sent" && (
-                    <div className="pt-2">
+
+                  {hasQuoteReady && (
+                    <div className="pt-2" data-testid="job-quote-ready-section">
+                      <p className="text-xs text-slate-600 mb-1">Your pro has sent a quote.</p>
                       <Button
                         onClick={handleApproveAndPay}
                         disabled={approving}
                         data-testid="approve-and-pay-button"
                       >
-                        {approving ? "Opening checkout…" : "Approve & pay with Stripe"}
+                        {approving ? "Opening checkout…" : "Approve quote"}
                       </Button>
-                      <p className="mt-1 text-[11px] text-slate-500" data-testid="approve-and-pay-note">
-                        You&apos;ll be redirected to a secure Stripe Checkout page in test mode.
+                      <p className="mt-1 text-[11px] text-slate-500" data-testid="approve-quote-tooltip">
+                        Approve to proceed to payment. We’ll hold the payment securely until the job is complete.
                       </p>
                     </div>
+                  )}
+
+                  {isPaidOrConfirmed && (
+                    <p className="text-xs text-emerald-700" data-testid="payment-confirmation-text">
+                      Thank you! We’ve received your payment. Your job is confirmed.
+                    </p>
                   )}
                 </div>
               )}
@@ -546,7 +605,7 @@ function AuthForm({ title, onSubmit, submitting, dataTestIdPrefix }) {
             disabled={submitting}
             data-testid={`${dataTestIdPrefix}-submit-button`}
           >
-            {submitting ? "Signing in..." : "Sign in"}
+            {submitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>
       </CardContent>
@@ -592,12 +651,12 @@ function OperatorLoginPage() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-header-title">Operator login</div>
+        <div className="app-header-title">Operator Login</div>
       </header>
       <main className="app-main">
         <section>
           <AuthForm
-            title="Sign in as operator/admin"
+            title="Operator Login"
             onSubmit={handleLogin}
             submitting={submitting}
             dataTestIdPrefix="operator-login"
@@ -619,6 +678,7 @@ function OperatorDashboard() {
   const [quoteForm, setQuoteForm] = React.useState({ label: "Base visit", type: "base", quantity: 1, unit_price_cents: "" });
   const [contractorTab, setContractorTab] = React.useState("jobs");
   const [contractors, setContractors] = React.useState([]);
+  const [updateStatus, setUpdateStatus] = React.useState("");
   const { cities, categories } = useCitiesAndCategories();
 
   React.useEffect(() => {
@@ -695,10 +755,31 @@ function OperatorDashboard() {
       await axios.post(`/operator/jobs/${selectedJobId}/send-quote`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast({ title: "Quote sent", description: "The client will see it on their status link." });
+      toast({ title: "Quote sent", description: "The client will see it on their status page." });
     } catch (err) {
       console.error("Send quote failed", err);
       toast({ title: "Unable to send quote", description: "Ensure a draft exists first." });
+    }
+  }
+
+  async function handleUpdateStatus() {
+    if (!selectedJobId || !updateStatus) return;
+    try {
+      await axios.patch(
+        `/operator/jobs/${selectedJobId}`,
+        { status: updateStatus },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast({ title: "Status updated", description: "Job status has been updated." });
+      // Refresh jobs
+      const res = await axios.get("/operator/jobs", {
+        params: filters,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setJobs(res.data);
+    } catch (err) {
+      console.error("Update status failed", err);
+      toast({ title: "Unable to update status", description: "Please try again." });
     }
   }
 
@@ -707,64 +788,72 @@ function OperatorDashboard() {
       <header className="app-header">
         <div>
           <div className="app-header-title">Operator dashboard</div>
-          <div className="app-tagline">Watch jobs flow through the money loop.</div>
         </div>
       </header>
       <main className="app-main">
         <section className="space-y-3">
-          <div className="flex flex-wrap gap-2" data-testid="operator-filters">
-            <Select
-              value={filters.city_slug}
-              onValueChange={(v) => setFilters((f) => ({ ...f, city_slug: v }))}
-            >
-              <SelectTrigger className="w-40" data-testid="operator-filter-city">
-                <SelectValue placeholder="All cities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="" data-testid="operator-filter-city-all">All cities</SelectItem>
-                {cities.map((c) => (
-                  <SelectItem key={c.id} value={c.slug} data-testid={`operator-filter-city-${c.slug}`}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap gap-4 items-end" data-testid="operator-filters">
+            <div>
+              <div className="text-[11px] text-slate-500 mb-1">City</div>
+              <Select
+                value={filters.city_slug}
+                onValueChange={(v) => setFilters((f) => ({ ...f, city_slug: v }))}
+              >
+                <SelectTrigger className="w-40" data-testid="operator-filter-city">
+                  <SelectValue placeholder="All cities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" data-testid="operator-filter-city-all">All cities</SelectItem>
+                  {cities.map((c) => (
+                    <SelectItem key={c.id} value={c.slug} data-testid={`operator-filter-city-${c.slug}`}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              value={filters.service_category_slug}
-              onValueChange={(v) => setFilters((f) => ({ ...f, service_category_slug: v }))}
-            >
-              <SelectTrigger className="w-44" data-testid="operator-filter-category">
-                <SelectValue placeholder="All services" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="" data-testid="operator-filter-category-all">All services</SelectItem>
-                {categories.map((s) => (
-                  <SelectItem key={s.id} value={s.slug} data-testid={`operator-filter-category-${s.slug}`}>
-                    {s.display_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div>
+              <div className="text-[11px] text-slate-500 mb-1">Service</div>
+              <Select
+                value={filters.service_category_slug}
+                onValueChange={(v) => setFilters((f) => ({ ...f, service_category_slug: v }))}
+              >
+                <SelectTrigger className="w-44" data-testid="operator-filter-category">
+                  <SelectValue placeholder="All services" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" data-testid="operator-filter-category-all">All services</SelectItem>
+                  {categories.map((s) => (
+                    <SelectItem key={s.id} value={s.slug} data-testid={`operator-filter-category-${s.slug}`}>
+                      {s.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              value={filters.status}
-              onValueChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-            >
-              <SelectTrigger className="w-44" data-testid="operator-filter-status">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="" data-testid="operator-filter-status-all">All</SelectItem>
-                <SelectItem value="new" data-testid="operator-filter-status-new">New</SelectItem>
-                <SelectItem value="offering_contractors" data-testid="operator-filter-status-offering">Offering</SelectItem>
-                <SelectItem value="awaiting_quote" data-testid="operator-filter-status-awaiting-quote">Awaiting quote</SelectItem>
-                <SelectItem value="quote_sent" data-testid="operator-filter-status-quote-sent">Quote sent</SelectItem>
-                <SelectItem value="awaiting_payment" data-testid="operator-filter-status-awaiting-payment">Awaiting payment</SelectItem>
-                <SelectItem value="confirmed" data-testid="operator-filter-status-confirmed">Confirmed</SelectItem>
-                <SelectItem value="completed" data-testid="operator-filter-status-completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <div className="text-[11px] text-slate-500 mb-1">Status</div>
+              <Select
+                value={filters.status}
+                onValueChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+              >
+                <SelectTrigger className="w-44" data-testid="operator-filter-status">
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" data-testid="operator-filter-status-all">All</SelectItem>
+                  <SelectItem value="new" data-testid="operator-filter-status-new">New</SelectItem>
+                  <SelectItem value="offering_contractors" data-testid="operator-filter-status-offering">Offering</SelectItem>
+                  <SelectItem value="awaiting_quote" data-testid="operator-filter-status-awaiting-quote">Awaiting quote</SelectItem>
+                  <SelectItem value="quote_sent" data-testid="operator-filter-status-quote-sent">Quote sent</SelectItem>
+                  <SelectItem value="awaiting_payment" data-testid="operator-filter-status-awaiting-payment">Awaiting payment</SelectItem>
+                  <SelectItem value="confirmed" data-testid="operator-filter-status-confirmed">Confirmed</SelectItem>
+                  <SelectItem value="completed" data-testid="operator-filter-status-completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="flex gap-1 ml-auto" data-testid="operator-main-tabs">
               <Button
@@ -789,7 +878,7 @@ function OperatorDashboard() {
           {contractorTab === "jobs" && (
             <Card data-testid="operator-jobs-card">
               <CardHeader>
-                <CardTitle className="text-base">Jobs</CardTitle>
+                <CardTitle className="text-base">All Jobs</CardTitle>
               </CardHeader>
               <CardContent>
                 {jobs.length === 0 ? (
@@ -853,7 +942,7 @@ function OperatorDashboard() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-slate-500">Completed: {c.completed_jobs_count}</div>
+                          <div className="text-slate-500">Completed Jobs: {c.completed_jobs_count}</div>
                           <div className="text-slate-700 font-semibold">
                             ${(c.total_earnings_cents / 100).toFixed(2)} USD
                           </div>
@@ -928,15 +1017,49 @@ function OperatorDashboard() {
                         Create draft quote
                       </Button>
                     </form>
-                    <div className="pt-2">
+                    <div className="flex flex-wrap gap-2 pt-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleSendQuote}
                         data-testid="operator-quote-send-button"
                       >
-                        Send latest quote to client
+                        Send Quote
                       </Button>
+                      <div className="flex items-end gap-2">
+                        <div>
+                          <label className="text-[11px] text-slate-500" htmlFor="update-status-select" data-testid="operator-update-status-label">
+                            Update Status
+                          </label>
+                          <Select
+                            value={updateStatus}
+                            onValueChange={setUpdateStatus}
+                          >
+                            <SelectTrigger
+                              id="update-status-select"
+                              className="w-40"
+                              data-testid="operator-update-status-select"
+                            >
+                              <SelectValue placeholder="Choose status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="in_progress">In progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled_by_client">Cancelled by client</SelectItem>
+                              <SelectItem value="cancelled_internal">Cancelled internal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleUpdateStatus}
+                          data-testid="operator-update-status-button"
+                        >
+                          Update Status
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -953,6 +1076,35 @@ function OperatorDashboard() {
 // ------------------------
 // Contractor portal
 // ------------------------
+
+function ContractorWelcomePage() {
+  const navigate = useNavigate();
+  return (
+    <div className="app-shell" data-testid="contractor-welcome-page">
+      <header className="app-header">
+        <div className="app-header-title">Join The Bridge</div>
+      </header>
+      <main className="app-main">
+        <section>
+          <Card data-testid="contractor-welcome-card">
+            <CardHeader>
+              <CardTitle className="text-base">Earn on your schedule. We connect you with local customers.</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate("/contractor/signup")}
+                data-testid="contractor-welcome-signup-button"
+              >
+                Sign up as a contractor
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+      <Toaster />
+    </div>
+  );
+}
 
 function ContractorLoginPage() {
   const navigate = useNavigate();
@@ -988,7 +1140,7 @@ function ContractorLoginPage() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-header-title">Contractor login</div>
+        <div className="app-header-title">Contractor Login</div>
         <a
           href="/contractor/signup"
           className="text-xs text-indigo-600 hover:underline"
@@ -1000,7 +1152,7 @@ function ContractorLoginPage() {
       <main className="app-main">
         <section>
           <AuthForm
-            title="Sign in as contractor"
+            title="Contractor Login"
             onSubmit={handleLogin}
             submitting={submitting}
             dataTestIdPrefix="contractor-login"
@@ -1025,7 +1177,11 @@ function ContractorSignupPage() {
     city_slug: "",
     base_zip: "",
     radius_miles: "10",
-    bio: "",
+    experience: "",
+    availability: "",
+    payout_method: "",
+    referral_code: "",
+    legal_name: "",
     suggest_city_name_text: "",
     suggest_zip: "",
     suggest_service_category_id: "",
@@ -1064,13 +1220,15 @@ function ContractorSignupPage() {
         base_zip: form.base_zip,
         radius_miles: Number(form.radius_miles) || 0,
         service_category_ids: selectedServices,
-        bio: form.bio || undefined,
+        bio: form.experience || undefined,
         suggest_city_name_text: form.suggest_city_name_text || undefined,
         suggest_zip: form.suggest_zip || undefined,
         suggest_service_category_id: form.suggest_service_category_id || undefined,
+        // Additional profile fields like legal name, payout method, availability, and referral code
+        // are captured in the UI for now and can be wired to the backend in a later iteration.
       };
       await axios.post("/contractors/signup", body);
-      toast({ title: "Signup complete", description: "You can log in to see offers." });
+      toast({ title: "Profile created", description: "You can log in to see available jobs." });
       navigate("/contractor/login", { replace: true });
     } catch (err) {
       console.error("Contractor signup failed", err);
@@ -1083,13 +1241,13 @@ function ContractorSignupPage() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-header-title">Contractor signup</div>
+        <div className="app-header-title">Join The Bridge</div>
       </header>
       <main className="app-main">
         <section>
           <Card className="w-full max-w-xl" data-testid="contractor-signup-card">
             <CardHeader>
-              <CardTitle className="text-base">Join The Bridge network</CardTitle>
+              <CardTitle className="text-base">Create your contractor profile</CardTitle>
             </CardHeader>
             <CardContent>
               <form
@@ -1100,7 +1258,7 @@ function ContractorSignupPage() {
                 <div className="app-input-row">
                   <div>
                     <label className="text-xs text-slate-600" htmlFor="signup-name" data-testid="contractor-signup-name-label">
-                      Name
+                      Business or display name
                     </label>
                     <Input
                       id="signup-name"
@@ -1110,8 +1268,33 @@ function ContractorSignupPage() {
                     />
                   </div>
                   <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-legal" data-testid="contractor-signup-legal-label">
+                      Legal name (for payments)
+                    </label>
+                    <Input
+                      id="signup-legal"
+                      value={form.legal_name}
+                      onChange={updateField("legal_name")}
+                      data-testid="contractor-signup-legal-input"
+                    />
+                  </div>
+                </div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-email" data-testid="contractor-signup-email-label">
+                      Email address
+                    </label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      value={form.email}
+                      onChange={updateField("email")}
+                      data-testid="contractor-signup-email-input"
+                    />
+                  </div>
+                  <div>
                     <label className="text-xs text-slate-600" htmlFor="signup-phone" data-testid="contractor-signup-phone-label">
-                      Phone
+                      Phone number
                     </label>
                     <Input
                       id="signup-phone"
@@ -1122,18 +1305,6 @@ function ContractorSignupPage() {
                   </div>
                 </div>
                 <div className="app-input-row">
-                  <div>
-                    <label className="text-xs text-slate-600" htmlFor="signup-email" data-testid="contractor-signup-email-label">
-                      Email
-                    </label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={form.email}
-                      onChange={updateField("email")}
-                      data-testid="contractor-signup-email-input"
-                    />
-                  </div>
                   <div>
                     <label className="text-xs text-slate-600" htmlFor="signup-city" data-testid="contractor-signup-city-label">
                       City
@@ -1154,8 +1325,6 @@ function ContractorSignupPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="app-input-row">
                   <div>
                     <label className="text-xs text-slate-600" htmlFor="signup-zip" data-testid="contractor-signup-zip-label">
                       Base ZIP
@@ -1167,6 +1336,8 @@ function ContractorSignupPage() {
                       data-testid="contractor-signup-zip-input"
                     />
                   </div>
+                </div>
+                <div className="app-input-row">
                   <div>
                     <label className="text-xs text-slate-600" htmlFor="signup-radius" data-testid="contractor-signup-radius-label">
                       Radius (miles)
@@ -1179,10 +1350,22 @@ function ContractorSignupPage() {
                       data-testid="contractor-signup-radius-input"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-payout" data-testid="contractor-signup-payout-label">
+                      How would you like to get paid?
+                    </label>
+                    <Input
+                      id="signup-payout"
+                      placeholder="e.g., Zelle or Check"
+                      value={form.payout_method}
+                      onChange={updateField("payout_method")}
+                      data-testid="contractor-signup-payout-input"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs text-slate-600" data-testid="contractor-signup-services-label">
-                    Services
+                    What kind of jobs do you take?
                   </label>
                   <div className="mt-1 flex flex-wrap gap-2" data-testid="contractor-signup-services-group">
                     {categories.map((s) => (
@@ -1202,15 +1385,28 @@ function ContractorSignupPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-600" htmlFor="signup-bio" data-testid="contractor-signup-bio-label">
-                    Short bio (optional)
+                  <label className="text-xs text-slate-600" htmlFor="signup-experience" data-testid="contractor-signup-experience-label">
+                    Reliability & Experience
                   </label>
                   <Textarea
-                    id="signup-bio"
+                    id="signup-experience"
                     rows={3}
-                    value={form.bio}
-                    onChange={updateField("bio")}
-                    data-testid="contractor-signup-bio-input"
+                    value={form.experience}
+                    onChange={updateField("experience")}
+                    data-testid="contractor-signup-experience-input"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="signup-availability" data-testid="contractor-signup-availability-label">
+                    When are you available?
+                  </label>
+                  <Textarea
+                    id="signup-availability"
+                    rows={2}
+                    placeholder="e.g., Weekdays 9–5, Saturdays 10–2"
+                    value={form.availability}
+                    onChange={updateField("availability")}
+                    data-testid="contractor-signup-availability-input"
                   />
                 </div>
                 <div className="app-input-row">
@@ -1239,23 +1435,36 @@ function ContractorSignupPage() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs text-slate-600" data-testid="contractor-signup-suggest-label">
-                    Suggest a new area (optional)
-                  </label>
-                  <div className="app-input-row mt-1">
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-referral" data-testid="contractor-signup-referral-label">
+                      Referral Code (optional)
+                    </label>
                     <Input
-                      placeholder="City or neighborhood"
-                      value={form.suggest_city_name_text}
-                      onChange={updateField("suggest_city_name_text")}
-                      data-testid="contractor-signup-suggest-city-input"
+                      id="signup-referral"
+                      value={form.referral_code}
+                      onChange={updateField("referral_code")}
+                      data-testid="contractor-signup-referral-input"
                     />
-                    <Input
-                      placeholder="ZIP"
-                      value={form.suggest_zip}
-                      onChange={updateField("suggest_zip")}
-                      data-testid="contractor-signup-suggest-zip-input"
-                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" data-testid="contractor-signup-suggest-label">
+                      Suggest a new area (optional)
+                    </label>
+                    <div className="app-input-row mt-1">
+                      <Input
+                        placeholder="City or neighborhood"
+                        value={form.suggest_city_name_text}
+                        onChange={updateField("suggest_city_name_text")}
+                        data-testid="contractor-signup-suggest-city-input"
+                      />
+                      <Input
+                        placeholder="ZIP"
+                        value={form.suggest_zip}
+                        onChange={updateField("suggest_zip")}
+                        data-testid="contractor-signup-suggest-zip-input"
+                      />
+                    </div>
                   </div>
                 </div>
                 <Button
@@ -1263,7 +1472,7 @@ function ContractorSignupPage() {
                   disabled={submitting}
                   data-testid="contractor-signup-submit-button"
                 >
-                  {submitting ? "Creating account..." : "Create account"}
+                  {submitting ? "Creating profile…" : "Create my profile"}
                 </Button>
               </form>
             </CardContent>
@@ -1282,6 +1491,9 @@ function ContractorDashboard() {
   const [tab, setTab] = React.useState("offers");
   const [offers, setOffers] = React.useState([]);
   const [jobs, setJobs] = React.useState([]);
+  const [acceptingId, setAcceptingId] = React.useState(null);
+  const [savingJobId, setSavingJobId] = React.useState(null);
+  const [completionNote, setCompletionNote] = React.useState("");
 
   React.useEffect(() => {
     if (!token) {
@@ -1318,12 +1530,13 @@ function ContractorDashboard() {
 
   async function acceptJob(jobId) {
     try {
+      setAcceptingId(jobId);
       await axios.post(
         `/contractors/offers/${jobId}/accept`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast({ title: "Job accepted", description: "You can now prepare a quote with the operator." });
+      toast({ title: "Job accepted", description: "You can now work with the operator on a quote." });
       const [offersRes, jobsRes] = await Promise.all([
         axios.get("/contractors/me/offers", { headers: { Authorization: `Bearer ${token}` } }),
         axios.get("/contractors/me/jobs", { headers: { Authorization: `Bearer ${token}` } }),
@@ -1333,22 +1546,28 @@ function ContractorDashboard() {
     } catch (err) {
       console.error("Accept job failed", err);
       toast({ title: "Unable to accept", description: "This job may have been taken already." });
+    } finally {
+      setAcceptingId(null);
     }
   }
 
   async function markCompleted(jobId) {
     try {
+      setSavingJobId(jobId);
       await axios.post(
         `/contractors/jobs/${jobId}/mark-complete`,
-        { completion_note: "Marked complete via dashboard" },
+        { completion_note: completionNote || undefined },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast({ title: "Job completed", description: "Payout will be queued by the operator." });
+      toast({ title: "Marked as completed.", description: "Thank you!" });
       const res = await axios.get("/contractors/me/jobs", { headers: { Authorization: `Bearer ${token}` } });
       setJobs(res.data);
+      setCompletionNote("");
     } catch (err) {
       console.error("Mark complete failed", err);
       toast({ title: "Unable to complete", description: "Ensure the job is confirmed first." });
+    } finally {
+      setSavingJobId(null);
     }
   }
 
@@ -1356,8 +1575,8 @@ function ContractorDashboard() {
     <div className="app-shell" data-testid="contractor-dashboard">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Contractor portal</div>
-          <div className="app-tagline">Accept jobs, finish work, and see payouts queued.</div>
+          <div className="app-header-title">Join The Bridge</div>
+          <div className="app-tagline">Earn on your schedule. We connect you with local customers.</div>
         </div>
       </header>
       <main className="app-main">
@@ -1368,21 +1587,22 @@ function ContractorDashboard() {
               onClick={() => setTab("offers")}
               data-testid="contractor-tab-offers"
             >
-              Offers
+              Available Jobs
             </Button>
             <Button
               variant={tab === "jobs" ? "default" : "outline"}
               onClick={() => setTab("jobs")}
               data-testid="contractor-tab-jobs"
             >
-              My jobs
+              Your Jobs
             </Button>
           </div>
 
           {tab === "offers" && (
             <Card data-testid="contractor-offers-card">
               <CardHeader>
-                <CardTitle className="text-base">Available offers</CardTitle>
+                <CardTitle className="text-base">Available Jobs</CardTitle>
+                <p className="mt-1 text-xs text-slate-500">Browse open requests in your area.</p>
               </CardHeader>
               <CardContent>
                 {offers.length === 0 ? (
@@ -1404,9 +1624,10 @@ function ContractorDashboard() {
                         <Button
                           size="sm"
                           onClick={() => acceptJob(j.id)}
+                          disabled={acceptingId === j.id}
                           data-testid={`contractor-accept-${j.id}`}
                         >
-                          Accept
+                          {acceptingId === j.id ? "Accepting…" : "Accept job"}
                         </Button>
                       </div>
                     ))}
@@ -1419,9 +1640,24 @@ function ContractorDashboard() {
           {tab === "jobs" && (
             <Card data-testid="contractor-jobs-card">
               <CardHeader>
-                <CardTitle className="text-base">My jobs</CardTitle>
+                <CardTitle className="text-base">Your Jobs</CardTitle>
+                <p className="mt-1 text-xs text-slate-500">
+                  Your active jobs. Complete the tasks and enter a note when done.
+                </p>
               </CardHeader>
               <CardContent>
+                <div className="mb-3">
+                  <label className="text-xs text-slate-600" htmlFor="completion-note" data-testid="completion-note-label">
+                    Completion note
+                  </label>
+                  <Textarea
+                    id="completion-note"
+                    rows={2}
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                    data-testid="completion-note-input"
+                  />
+                </div>
                 {jobs.length === 0 ? (
                   <p className="text-sm text-slate-500" data-testid="contractor-jobs-empty">
                     You haven&apos;t accepted any jobs yet.
@@ -1442,9 +1678,10 @@ function ContractorDashboard() {
                           <Button
                             size="sm"
                             onClick={() => markCompleted(j.id)}
+                            disabled={savingJobId === j.id}
                             data-testid={`contractor-complete-${j.id}`}
                           >
-                            Mark completed
+                            {savingJobId === j.id ? "Saving…" : "Mark completed"}
                           </Button>
                         )}
                       </div>
@@ -1473,6 +1710,7 @@ function App() {
         <Route path="/jobs/:jobId/status" element={<JobStatusPage />} />
         <Route path="/operator/login" element={<OperatorLoginPage />} />
         <Route path="/operator/dashboard" element={<OperatorDashboard />} />
+        <Route path="/contractor" element={<ContractorWelcomePage />} />
         <Route path="/contractor/login" element={<ContractorLoginPage />} />
         <Route path="/contractor/signup" element={<ContractorSignupPage />} />
         <Route path="/contractor/dashboard" element={<ContractorDashboard />} />
