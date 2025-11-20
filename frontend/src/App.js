@@ -152,7 +152,7 @@ function ClientHomePage() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Request a service in {selectedCityName}</div>
+          <div className="app-header-title">Request a service with ProBridge</div>
           <div className="app-tagline">Tell us about your project. We’re here to help!</div>
         </div>
       </header>
