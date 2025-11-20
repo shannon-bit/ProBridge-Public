@@ -787,7 +787,7 @@ function OperatorDashboard() {
     <div className="app-shell" data-testid="operator-dashboard">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Operator dashboard</div>
+          <div className="app-header-title">ProBridge Operator Dashboard</div>
         </div>
       </header>
       <main className="app-main">
