@@ -971,7 +971,7 @@ function OperatorDashboard() {
                 {selectedJob && (
                   <div className="space-y-3" data-testid="operator-selected-job-panel">
                     <div>
-                      <div className="text-xs text-slate-500">Title</div>
+                      <div className="text-xs text-slate-500">Your ProBridge job</div>
                       <div className="text-sm font-medium">{selectedJob.title || "Untitled"}</div>
                       <p className="mt-1 text-xs text-slate-500">{selectedJob.description}</p>
                     </div>
