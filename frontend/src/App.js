@@ -1,5 +1,13 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useSearchParams,
+  useParams,
+} from "react-router-dom";
 import axios from "axios";
 import "@/App.css";
 import "@/index.css";
@@ -15,6 +23,10 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 axios.defaults.baseURL = API;
+
+// ------------------------
+// Shared hooks & helpers
+// ------------------------
 
 function useCitiesAndCategories() {
   const [cities, setCities] = React.useState([]);
@@ -41,6 +53,25 @@ function useCitiesAndCategories() {
 
   return { cities, categories, loading };
 }
+
+function useAuth(roleKey) {
+  const [token, setToken] = React.useState(() => localStorage.getItem(roleKey) || "");
+
+  function saveToken(nextToken) {
+    setToken(nextToken);
+    if (nextToken) {
+      localStorage.setItem(roleKey, nextToken);
+    } else {
+      localStorage.removeItem(roleKey);
+    }
+  }
+
+  return { token, saveToken };
+}
+
+// ------------------------
+// Client: job request + status
+// ------------------------
 
 function ClientHomePage() {
   const { toast } = useToast();
@@ -134,7 +165,7 @@ function ClientHomePage() {
             <form onSubmit={handleSubmit} className="space-y-3" data-testid="job-request-form">
               <div className="app-input-row">
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="city" data-testid="label-city">
+                  <label className="text-xs text-slate-600" htmlFor="city" data-testid="label-city">
                     City
                   </label>
                   <Select
@@ -155,7 +186,7 @@ function ClientHomePage() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="category" data-testid="label-category">
+                  <label className="text-xs text-slate-600" htmlFor="category" data-testid="label-category">
                     Service category
                   </label>
                   <Select
@@ -177,7 +208,7 @@ function ClientHomePage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-300" htmlFor="title" data-testid="label-title">
+                <label className="text-xs text-slate-600" htmlFor="title" data-testid="label-title">
                   Short title (optional)
                 </label>
                 <Input
@@ -190,7 +221,7 @@ function ClientHomePage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-300" htmlFor="description" data-testid="label-description">
+                <label className="text-xs text-slate-600" htmlFor="description" data-testid="label-description">
                   What do you need done?
                 </label>
                 <Textarea
@@ -205,7 +236,7 @@ function ClientHomePage() {
 
               <div className="app-input-row">
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="zip" data-testid="label-zip">
+                  <label className="text-xs text-slate-600" htmlFor="zip" data-testid="label-zip">
                     ZIP code
                   </label>
                   <Input
@@ -217,7 +248,7 @@ function ClientHomePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="timing" data-testid="label-preferred-timing">
+                  <label className="text-xs text-slate-600" htmlFor="timing" data-testid="label-preferred-timing">
                     Preferred timing
                   </label>
                   <Select
@@ -248,7 +279,7 @@ function ClientHomePage() {
               <div className="app-divider-label">How can we reach you?</div>
               <div className="app-input-row">
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="client_name" data-testid="label-client-name">
+                  <label className="text-xs text-slate-600" htmlFor="client_name" data-testid="label-client-name">
                     Name
                   </label>
                   <Input
@@ -259,7 +290,7 @@ function ClientHomePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-300" htmlFor="client_phone" data-testid="label-client-phone">
+                  <label className="text-xs text-slate-600" htmlFor="client_phone" data-testid="label-client-phone">
                     Mobile number
                   </label>
                   <Input
@@ -273,7 +304,7 @@ function ClientHomePage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-300" htmlFor="client_email" data-testid="label-client-email">
+                <label className="text-xs text-slate-600" htmlFor="client_email" data-testid="label-client-email">
                   Email (optional, for receipts)
                 </label>
                 <Input
@@ -286,12 +317,12 @@ function ClientHomePage() {
               </div>
 
               <div className="flex items-center justify-between gap-3 pt-1">
-                <label className="flex items-center gap-2 text-xs text-slate-300" data-testid="label-is-test">
+                <label className="flex items-center gap-2 text-xs text-slate-600" data-testid="label-is-test">
                   <input
                     type="checkbox"
                     checked={form.is_test}
                     onChange={onChange("is_test")}
-                    className="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
+                    className="h-3.5 w-3.5 rounded border-slate-300 bg-white"
                     data-testid="input-is-test-toggle"
                   />
                   <span>This is a sandbox / test job</span>
@@ -304,7 +335,6 @@ function ClientHomePage() {
               <div className="flex items-center justify-between pt-3">
                 <Button
                   type="submit"
-                  className="app-primary-button"
                   disabled={submitting}
                   data-testid="job-request-submit-button"
                 >
@@ -314,7 +344,7 @@ function ClientHomePage() {
                 {statusLink && (
                   <a
                     href={statusLink}
-                    className="app-ghost-button"
+                    className="text-xs text-indigo-600 hover:underline"
                     data-testid="job-status-link"
                   >
                     Open status page
@@ -467,6 +497,10 @@ function JobStatusPage() {
   );
 }
 
+// ------------------------
+// Auth helpers
+// ------------------------
+
 function AuthForm({ title, onSubmit, submitting, dataTestIdPrefix }) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -520,20 +554,9 @@ function AuthForm({ title, onSubmit, submitting, dataTestIdPrefix }) {
   );
 }
 
-function useAuth(roleKey) {
-  const [token, setToken] = React.useState(() => localStorage.getItem(roleKey) || "");
-
-  function saveToken(nextToken) {
-    setToken(nextToken);
-    if (nextToken) {
-      localStorage.setItem(roleKey, nextToken);
-    } else {
-      localStorage.removeItem(roleKey);
-    }
-  }
-
-  return { token, saveToken };
-}
+// ------------------------
+// Operator portal
+// ------------------------
 
 function OperatorLoginPage() {
   const navigate = useNavigate();
@@ -592,6 +615,10 @@ function OperatorDashboard() {
   const navigate = useNavigate();
   const [filters, setFilters] = React.useState({ city_slug: "", status: "", service_category_slug: "" });
   const [jobs, setJobs] = React.useState([]);
+  const [selectedJobId, setSelectedJobId] = React.useState(null);
+  const [quoteForm, setQuoteForm] = React.useState({ label: "Base visit", type: "base", quantity: 1, unit_price_cents: "" });
+  const [contractorTab, setContractorTab] = React.useState("jobs");
+  const [contractors, setContractors] = React.useState([]);
   const { cities, categories } = useCitiesAndCategories();
 
   React.useEffect(() => {
@@ -601,7 +628,7 @@ function OperatorDashboard() {
   }, [token, navigate]);
 
   React.useEffect(() => {
-    async function load() {
+    async function loadJobs() {
       try {
         const params = {};
         if (filters.city_slug) params.city_slug = filters.city_slug;
@@ -617,8 +644,63 @@ function OperatorDashboard() {
         toast({ title: "Could not load jobs", description: "Check your operator access." });
       }
     }
-    if (token) load();
+    if (token) loadJobs();
   }, [filters, token, toast]);
+
+  React.useEffect(() => {
+    async function loadContractors() {
+      try {
+        const res = await axios.get("/operator/contractors", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setContractors(res.data);
+      } catch (err) {
+        console.error("Failed to load contractors", err);
+      }
+    }
+    if (token && contractorTab === "contractors") {
+      loadContractors();
+    }
+  }, [token, contractorTab]);
+
+  const selectedJob = jobs.find((j) => j.id === selectedJobId) || null;
+
+  async function handleCreateQuote(e) {
+    e.preventDefault();
+    if (!selectedJobId) return;
+    try {
+      const body = {
+        line_items: [
+          {
+            type: quoteForm.type,
+            label: quoteForm.label,
+            quantity: Number(quoteForm.quantity) || 1,
+            unit_price_cents: Number(quoteForm.unit_price_cents) || 0,
+          },
+        ],
+      };
+      await axios.post(`/operator/jobs/${selectedJobId}/quotes`, body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast({ title: "Quote drafted", description: "You can now send it to the client." });
+    } catch (err) {
+      console.error("Create quote failed", err);
+      toast({ title: "Unable to create quote", description: "Check fields and try again." });
+    }
+  }
+
+  async function handleSendQuote() {
+    if (!selectedJobId) return;
+    try {
+      await axios.post(`/operator/jobs/${selectedJobId}/send-quote`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast({ title: "Quote sent", description: "The client will see it on their status link." });
+    } catch (err) {
+      console.error("Send quote failed", err);
+      toast({ title: "Unable to send quote", description: "Ensure a draft exists first." });
+    }
+  }
 
   return (
     <div className="app-shell" data-testid="operator-dashboard">
@@ -683,53 +765,194 @@ function OperatorDashboard() {
                 <SelectItem value="completed" data-testid="operator-filter-status-completed">Completed</SelectItem>
               </SelectContent>
             </Select>
+
+            <div className="flex gap-1 ml-auto" data-testid="operator-main-tabs">
+              <Button
+                variant={contractorTab === "jobs" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setContractorTab("jobs")}
+                data-testid="operator-tab-jobs"
+              >
+                Jobs
+              </Button>
+              <Button
+                variant={contractorTab === "contractors" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setContractorTab("contractors")}
+                data-testid="operator-tab-contractors"
+              >
+                Contractors
+              </Button>
+            </div>
           </div>
 
-          <Card data-testid="operator-jobs-card">
-            <CardHeader>
-              <CardTitle className="text-base">Jobs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {jobs.length === 0 ? (
-                <p className="text-sm text-slate-500" data-testid="operator-jobs-empty">
-                  No jobs match your filters yet.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs" data-testid="operator-jobs-table">
-                    <thead className="border-b border-slate-200 text-[11px] uppercase text-slate-500">
-                      <tr>
-                        <th className="px-2 py-1 text-left">Created</th>
-                        <th className="px-2 py-1 text-left">Title</th>
-                        <th className="px-2 py-1 text-left">City</th>
-                        <th className="px-2 py-1 text-left">Category</th>
-                        <th className="px-2 py-1 text-left">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {jobs.map((j) => (
-                        <tr key={j.id} className="border-b border-slate-100" data-testid={`operator-job-row-${j.id}`}>
-                          <td className="px-2 py-1 align-top">
-                            {j.created_at || ""}
-                          </td>
-                          <td className="px-2 py-1 align-top">{j.title || "Untitled"}</td>
-                          <td className="px-2 py-1 align-top">{j.city_id}</td>
-                          <td className="px-2 py-1 align-top">{j.service_category_id}</td>
-                          <td className="px-2 py-1 align-top">{j.status}</td>
+          {contractorTab === "jobs" && (
+            <Card data-testid="operator-jobs-card">
+              <CardHeader>
+                <CardTitle className="text-base">Jobs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {jobs.length === 0 ? (
+                  <p className="text-sm text-slate-500" data-testid="operator-jobs-empty">
+                    No jobs match your filters yet.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-xs" data-testid="operator-jobs-table">
+                      <thead className="border-b border-slate-200 text-[11px] uppercase text-slate-500">
+                        <tr>
+                          <th className="px-2 py-1 text-left">Title</th>
+                          <th className="px-2 py-1 text-left">Status</th>
+                          <th className="px-2 py-1 text-left">ZIP</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      </thead>
+                      <tbody>
+                        {jobs.map((j) => (
+                          <tr
+                            key={j.id}
+                            className="border-b border-slate-100 cursor-pointer hover:bg-slate-50"
+                            data-testid={`operator-job-row-${j.id}`}
+                            onClick={() => setSelectedJobId(j.id)}
+                          >
+                            <td className="px-2 py-1 align-top">{j.title || "Untitled"}</td>
+                            <td className="px-2 py-1 align-top">{j.status}</td>
+                            <td className="px-2 py-1 align-top">{j.zip}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {contractorTab === "contractors" && (
+            <Card data-testid="operator-contractors-card">
+              <CardHeader>
+                <CardTitle className="text-base">Contractors</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {contractors.length === 0 ? (
+                  <p className="text-sm text-slate-500" data-testid="operator-contractors-empty">
+                    No contractors yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2" data-testid="operator-contractors-list">
+                    {contractors.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
+                        data-testid={`operator-contractor-${c.id}`}
+                      >
+                        <div>
+                          <div className="font-medium">{c.public_name}</div>
+                          <div className="text-slate-500">{c.city}</div>
+                          <div className="text-slate-500">
+                            Services: {c.service_labels?.join(", ") || "—"}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-slate-500">Completed: {c.completed_jobs_count}</div>
+                          <div className="text-slate-700 font-semibold">
+                            ${(c.total_earnings_cents / 100).toFixed(2)} USD
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </section>
+
+        {contractorTab === "jobs" && (
+          <section>
+            <Card data-testid="operator-job-detail-card">
+              <CardHeader>
+                <CardTitle className="text-base">Job detail & quote</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedJob && (
+                  <p className="text-sm text-slate-500" data-testid="operator-job-detail-empty">
+                    Select a job from the table to prepare a quote.
+                  </p>
+                )}
+                {selectedJob && (
+                  <div className="space-y-3" data-testid="operator-selected-job-panel">
+                    <div>
+                      <div className="text-xs text-slate-500">Title</div>
+                      <div className="text-sm font-medium">{selectedJob.title || "Untitled"}</div>
+                      <p className="mt-1 text-xs text-slate-500">{selectedJob.description}</p>
+                    </div>
+                    <form className="space-y-2" onSubmit={handleCreateQuote} data-testid="operator-quote-form">
+                      <div>
+                        <label className="text-xs text-slate-600" htmlFor="quote-label" data-testid="operator-quote-label">
+                          Line item label
+                        </label>
+                        <Input
+                          id="quote-label"
+                          value={quoteForm.label}
+                          onChange={(e) => setQuoteForm((f) => ({ ...f, label: e.target.value }))}
+                          data-testid="operator-quote-label-input"
+                        />
+                      </div>
+                      <div className="app-input-row">
+                        <div>
+                          <label className="text-xs text-slate-600" htmlFor="quote-qty" data-testid="operator-quote-quantity-label">
+                            Quantity
+                          </label>
+                          <Input
+                            id="quote-qty"
+                            type="number"
+                            value={quoteForm.quantity}
+                            onChange={(e) => setQuoteForm((f) => ({ ...f, quantity: e.target.value }))}
+                            data-testid="operator-quote-quantity-input"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-600" htmlFor="quote-unit" data-testid="operator-quote-unit-price-label">
+                            Unit price (cents)
+                          </label>
+                          <Input
+                            id="quote-unit"
+                            type="number"
+                            value={quoteForm.unit_price_cents}
+                            onChange={(e) => setQuoteForm((f) => ({ ...f, unit_price_cents: e.target.value }))}
+                            data-testid="operator-quote-unit-price-input"
+                          />
+                        </div>
+                      </div>
+                      <Button type="submit" size="sm" data-testid="operator-quote-create-button">
+                        Create draft quote
+                      </Button>
+                    </form>
+                    <div className="pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSendQuote}
+                        data-testid="operator-quote-send-button"
+                      >
+                        Send latest quote to client
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        )}
       </main>
       <Toaster />
     </div>
   );
 }
+
+// ------------------------
+// Contractor portal
+// ------------------------
 
 function ContractorLoginPage() {
   const navigate = useNavigate();
@@ -766,6 +989,13 @@ function ContractorLoginPage() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header-title">Contractor login</div>
+        <a
+          href="/contractor/signup"
+          className="text-xs text-indigo-600 hover:underline"
+          data-testid="contractor-login-signup-link"
+        >
+          Need an account? Sign up
+        </a>
       </header>
       <main className="app-main">
         <section>
@@ -775,6 +1005,269 @@ function ContractorLoginPage() {
             submitting={submitting}
             dataTestIdPrefix="contractor-login"
           />
+        </section>
+      </main>
+      <Toaster />
+    </div>
+  );
+}
+
+function ContractorSignupPage() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { cities, categories } = useCitiesAndCategories();
+  const [form, setForm] = React.useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    city_slug: "",
+    base_zip: "",
+    radius_miles: "10",
+    bio: "",
+    suggest_city_name_text: "",
+    suggest_zip: "",
+    suggest_service_category_id: "",
+  });
+  const [selectedServices, setSelectedServices] = React.useState([]);
+  const [submitting, setSubmitting] = React.useState(false);
+
+  function updateField(field) {
+    return (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  }
+
+  function toggleService(id) {
+    setSelectedServices((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      toast({ title: "Passwords don&apos;t match", description: "Please re-enter them." });
+      return;
+    }
+    if (!form.city_slug || selectedServices.length === 0) {
+      toast({ title: "Missing fields", description: "City and at least one service are required." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const body = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        city_slug: form.city_slug,
+        base_zip: form.base_zip,
+        radius_miles: Number(form.radius_miles) || 0,
+        service_category_ids: selectedServices,
+        bio: form.bio || undefined,
+        suggest_city_name_text: form.suggest_city_name_text || undefined,
+        suggest_zip: form.suggest_zip || undefined,
+        suggest_service_category_id: form.suggest_service_category_id || undefined,
+      };
+      await axios.post("/contractors/signup", body);
+      toast({ title: "Signup complete", description: "You can log in to see offers." });
+      navigate("/contractor/login", { replace: true });
+    } catch (err) {
+      console.error("Contractor signup failed", err);
+      toast({ title: "Signup failed", description: "Check your details and try again." });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="app-header-title">Contractor signup</div>
+      </header>
+      <main className="app-main">
+        <section>
+          <Card className="w-full max-w-xl" data-testid="contractor-signup-card">
+            <CardHeader>
+              <CardTitle className="text-base">Join The Bridge network</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-3"
+                data-testid="contractor-signup-form"
+              >
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-name" data-testid="contractor-signup-name-label">
+                      Name
+                    </label>
+                    <Input
+                      id="signup-name"
+                      value={form.name}
+                      onChange={updateField("name")}
+                      data-testid="contractor-signup-name-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-phone" data-testid="contractor-signup-phone-label">
+                      Phone
+                    </label>
+                    <Input
+                      id="signup-phone"
+                      value={form.phone}
+                      onChange={updateField("phone")}
+                      data-testid="contractor-signup-phone-input"
+                    />
+                  </div>
+                </div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-email" data-testid="contractor-signup-email-label">
+                      Email
+                    </label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      value={form.email}
+                      onChange={updateField("email")}
+                      data-testid="contractor-signup-email-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-city" data-testid="contractor-signup-city-label">
+                      City
+                    </label>
+                    <Select
+                      value={form.city_slug}
+                      onValueChange={(v) => setForm((prev) => ({ ...prev, city_slug: v }))}
+                    >
+                      <SelectTrigger id="signup-city" data-testid="contractor-signup-city-input">
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((c) => (
+                          <SelectItem key={c.id} value={c.slug} data-testid={`contractor-signup-city-${c.slug}`}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-zip" data-testid="contractor-signup-zip-label">
+                      Base ZIP
+                    </label>
+                    <Input
+                      id="signup-zip"
+                      value={form.base_zip}
+                      onChange={updateField("base_zip")}
+                      data-testid="contractor-signup-zip-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-radius" data-testid="contractor-signup-radius-label">
+                      Radius (miles)
+                    </label>
+                    <Input
+                      id="signup-radius"
+                      type="number"
+                      value={form.radius_miles}
+                      onChange={updateField("radius_miles")}
+                      data-testid="contractor-signup-radius-input"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" data-testid="contractor-signup-services-label">
+                    Services
+                  </label>
+                  <div className="mt-1 flex flex-wrap gap-2" data-testid="contractor-signup-services-group">
+                    {categories.map((s) => (
+                      <label
+                        key={s.id}
+                        className="flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-xs"
+                        data-testid={`contractor-signup-service-${s.slug}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes(s.id)}
+                          onChange={() => toggleService(s.id)}
+                        />
+                        <span>{s.display_name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="signup-bio" data-testid="contractor-signup-bio-label">
+                    Short bio (optional)
+                  </label>
+                  <Textarea
+                    id="signup-bio"
+                    rows={3}
+                    value={form.bio}
+                    onChange={updateField("bio")}
+                    data-testid="contractor-signup-bio-input"
+                  />
+                </div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-password" data-testid="contractor-signup-password-label">
+                      Password
+                    </label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={form.password}
+                      onChange={updateField("password")}
+                      data-testid="contractor-signup-password-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="signup-confirm" data-testid="contractor-signup-confirm-label">
+                      Confirm password
+                    </label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      value={form.confirmPassword}
+                      onChange={updateField("confirmPassword")}
+                      data-testid="contractor-signup-confirm-input"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" data-testid="contractor-signup-suggest-label">
+                    Suggest a new area (optional)
+                  </label>
+                  <div className="app-input-row mt-1">
+                    <Input
+                      placeholder="City or neighborhood"
+                      value={form.suggest_city_name_text}
+                      onChange={updateField("suggest_city_name_text")}
+                      data-testid="contractor-signup-suggest-city-input"
+                    />
+                    <Input
+                      placeholder="ZIP"
+                      value={form.suggest_zip}
+                      onChange={updateField("suggest_zip")}
+                      data-testid="contractor-signup-suggest-zip-input"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  data-testid="contractor-signup-submit-button"
+                >
+                  {submitting ? "Creating account..." : "Create account"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </section>
       </main>
       <Toaster />
@@ -945,7 +1438,7 @@ function ContractorDashboard() {
                           <div className="font-medium">{j.title || "Untitled"}</div>
                           <div className="text-slate-500">Status: {j.status}</div>
                         </div>
-                        {j.status === "confirmed" || j.status === "in_progress" ? (
+                        {(j.status === "confirmed" || j.status === "in_progress") && (
                           <Button
                             size="sm"
                             onClick={() => markCompleted(j.id)}
@@ -953,7 +1446,7 @@ function ContractorDashboard() {
                           >
                             Mark completed
                           </Button>
-                        ) : null}
+                        )}
                       </div>
                     ))}
                   </div>
@@ -968,6 +1461,10 @@ function ContractorDashboard() {
   );
 }
 
+// ------------------------
+// App routes
+// ------------------------
+
 function App() {
   return (
     <BrowserRouter>
@@ -977,6 +1474,7 @@ function App() {
         <Route path="/operator/login" element={<OperatorLoginPage />} />
         <Route path="/operator/dashboard" element={<OperatorDashboard />} />
         <Route path="/contractor/login" element={<ContractorLoginPage />} />
+        <Route path="/contractor/signup" element={<ContractorSignupPage />} />
         <Route path="/contractor/dashboard" element={<ContractorDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
