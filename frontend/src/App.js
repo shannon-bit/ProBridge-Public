@@ -485,7 +485,7 @@ function JobStatusPage() {
               {!loading && job && (
                 <div className="space-y-3" data-testid="job-status-summary">
                   <div>
-                    <div className="text-xs text-slate-500">Job</div>
+                    <div className="text-xs text-slate-500">Your ProBridge job</div>
                     <div className="text-sm font-medium" data-testid="job-status-title">
                       {job.title || "Untitled request"}
                     </div>
