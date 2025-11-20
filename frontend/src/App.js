@@ -517,7 +517,7 @@ function JobStatusPage() {
 
                   {job.quote_total_cents != null && (
                     <div className="border-t border-slate-200 pt-3 mt-2">
-                      <div className="text-xs text-slate-500">Quote total</div>
+                      <div className="text-xs text-slate-500">Your ProBridge quote</div>
                       <div className="text-lg font-semibold" data-testid="job-quote-total">
                         ${(job.quote_total_cents / 100).toFixed(2)} USD
                       </div>
