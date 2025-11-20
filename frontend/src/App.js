@@ -1082,7 +1082,7 @@ function ContractorWelcomePage() {
   return (
     <div className="app-shell" data-testid="contractor-welcome-page">
       <header className="app-header">
-        <div className="app-header-title">Join The Bridge</div>
+        <div className="app-header-title">Join ProBridge</div>
       </header>
       <main className="app-main">
         <section>
@@ -1241,7 +1241,7 @@ function ContractorSignupPage() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-header-title">Join The Bridge</div>
+        <div className="app-header-title">Join ProBridge</div>
       </header>
       <main className="app-main">
         <section>
@@ -1575,7 +1575,7 @@ function ContractorDashboard() {
     <div className="app-shell" data-testid="contractor-dashboard">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Join The Bridge</div>
+          <div className="app-header-title">Join ProBridge</div>
           <div className="app-tagline">Earn on your schedule. We connect you with local customers.</div>
         </div>
       </header>
