@@ -2143,7 +2143,6 @@ function ReferralPage() {
 // ------------------------
 
 function ReferralPage() {
-              <CardHeader>
                 <CardTitle className="text-base">Your Jobs</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">
                   Your active jobs. Complete the tasks and enter a note when done.
