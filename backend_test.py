@@ -178,12 +178,11 @@ def test_money_loop():
     # Step 5: Contractor login
     print("\n🔑 Step 5: Contractor Login")
     
-    contractor_login_data = {
+    # FastAPI OAuth2PasswordRequestForm expects form data, not JSON
+    contractor_login_result = client.test_endpoint_form('POST', '/auth/login', {
         "username": contractor_email,
         "password": "testpass123"
-    }
-    
-    contractor_login_result = client.test_endpoint('POST', '/auth/login', contractor_login_data)
+    })
     test_results.append(("POST /auth/login (contractor)", contractor_login_result))
     
     if contractor_login_result["success"]:
