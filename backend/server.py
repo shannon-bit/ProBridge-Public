@@ -518,6 +518,19 @@ async def transition_job_status(
 
     # Trigger basic handlers
     if new_status == "offering_contractors":
+        await on_job_created_handler(job)
+    if new_status == "quote_sent":
+        await on_quote_sent_handler(job)
+    if new_status == "completed":
+        await on_job_completed_handler(job)
+
+    return job
+
+
+# Helper to fetch contractor profile for a user
+async def get_contractor_profile_for_user(user_id: str) -> Optional[Dict[str, Any]]:
+    return await db.contractor_profiles.find_one({"user_id": user_id})
+
 
 async def send_client_job_received_email(job: Job, client_email: Optional[str]):
     if not client_email:
