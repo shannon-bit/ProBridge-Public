@@ -1212,13 +1212,21 @@ function ContractorWelcomePage() {
                 />
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-2">
               <Button
                 onClick={() => navigate("/contractor/signup")}
                 data-testid="contractor-welcome-signup-button"
               >
                 Sign up as a contractor
               </Button>
+              <button
+                type="button"
+                onClick={() => navigate("/contractor/login")}
+                className="text-xs text-indigo-600 hover:underline self-start"
+                data-testid="contractor-welcome-login-link"
+              >
+                Already a contractor? Log in
+              </button>
             </CardContent>
           </Card>
         </section>
