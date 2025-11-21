@@ -724,6 +724,30 @@ function OperatorDashboard() {
   }, [token, contractorTab]);
 
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null;
+  const selectedJob = jobs.find((j) => j.id === selectedJobId) || null;
+
+  const suggestedTotalCents = selectedJob?.pricing_suggestion?.suggested_total_cents ?? null;
+  const hasSuggestion = suggestedTotalCents != null;
+  const suggestedTotalDollars = hasSuggestion ? (suggestedTotalCents / 100).toFixed(2) : null;
+
+  React.useEffect(() => {
+    if (!selectedJob || !hasSuggestion) return;
+    // Prefill quote form with suggested flat price; operator can still edit
+    setQuoteForm((f) => {
+      const next = { ...f };
+      if (!next.label) {
+        next.label = "Suggested flat price";
+      }
+      if (!next.type) {
+        next.type = "base";
+      }
+      next.quantity = 1;
+      next.unit_price_cents = String(suggestedTotalCents);
+      return next;
+    });
+  }, [selectedJobId, hasSuggestion, suggestedTotalCents, selectedJob]);
+
+
 
   async function handleCreateQuote(e) {
     e.preventDefault();
