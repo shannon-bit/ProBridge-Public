@@ -1,0 +1,68 @@
+{
+  "role": "contractor",
+  "market": "abq",
+  "version": 1,
+  "last_updated": "2025-11-20",
+  "summary": "Contractor SOP for onboarding, accepting jobs, completing work, and receiving payouts in ProBridge ABQ.",
+  "live_url": "https://local-bridge.emergent.host",
+  "sections": [
+    {
+      "id": "onboarding",
+      "title": "Onboarding",
+      "steps": [
+        { "order": 1, "text": "Sign up through the ProBridge contractor portal for ABQ and provide your basic business details." },
+        { "order": 2, "text": "Select the service categories you are qualified for (e.g., handyman, cleaning, moving, etc.) and your typical service area in ABQ." },
+        { "order": 3, "text": "Submit any required verification information requested by the operator (e.g., insurance or licenses where applicable)." }
+      ]
+    },
+    {
+      "id": "receiving_and_accepting_jobs",
+      "title": "Receiving and Accepting Jobs",
+      "steps": [
+        { "order": 1, "text": "Monitor the contractor portal or your notifications for new job offers that match your categories and area." },
+        { "order": 2, "text": "For each offer, review the job description, location, date/time, and payout amount before accepting." },
+        { "order": 3, "text": "Accept only jobs you can reliably complete; if you cannot take the job, decline quickly so another contractor can be assigned." },
+        { "order": 4, "text": "Once accepted, the job status will move to 'assigned' and you will be expected to perform the work at the agreed time." }
+      ]
+    },
+    {
+      "id": "doing_the_job",
+      "title": "Doing the Job",
+      "steps": [
+        { "order": 1, "text": "Arrive on time and confirm the scope of work with the client before starting." },
+        { "order": 2, "text": "If the client requests work outside the agreed scope, contact the operator before committing to significant changes." },
+        { "order": 3, "text": "Work safely, respect the property, and follow any relevant regulations or building rules." }
+      ]
+    },
+    {
+      "id": "completing_the_job",
+      "title": "Completing the Job",
+      "steps": [
+        { "order": 1, "text": "After the work is finished, walk through the completed items with the client when possible." },
+        { "order": 2, "text": "In the contractor portal, mark the job as complete and add any notes the operator should be aware of." },
+        { "order": 3, "text": "If there were any issues (access problems, scope changes, safety concerns), document them in the notes for the operator." }
+      ]
+    },
+    {
+      "id": "payouts_and_timing",
+      "title": "Payouts and Timing",
+      "steps": [
+        { "order": 1, "text": "Once a job is marked completed and payment is confirmed, the system will calculate your payout according to the current ABQ payout structure (for example, 75% of the client total for v1)." },
+        { "order": 2, "text": "Payouts are targeted within the specified window (for example, within 24 hours of completion), depending on the configured payout method." },
+        { "order": 3, "text": "If a payout does not arrive within the expected window, contact the operator and reference your job ID and payout reference." }
+      ]
+    },
+    {
+      "id": "conduct_and_reliability",
+      "title": "Conduct and Reliability",
+      "steps": [
+        { "order": 1, "text": "Repeated no-shows, last-minute cancellations, or serious client complaints may result in fewer job offers or removal from the platform." },
+        { "order": 2, "text": "Maintain professional communication and notify the operator as early as possible if issues arise." }
+      ]
+    }
+  ],
+  "notes": [
+    "Contractors in ABQ are paid based on the agreed payout structure; platform fees are handled by ProBridge and are not charged separately to contractors.",
+    "High reliability and positive client feedback increase the likelihood of receiving more job offers."
+  ]
+}
