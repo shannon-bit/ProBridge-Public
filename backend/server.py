@@ -248,6 +248,7 @@ class Job(BaseModel):
     origin_channel: str
     is_test: bool = False
     client_view_token: str
+    pricing_suggestion: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(extra="ignore")
 
