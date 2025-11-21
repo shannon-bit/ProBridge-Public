@@ -903,33 +903,8 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
         await db.payments.insert_one(payment_doc)
         checkout_url = session.get("url")
 
-        new_status: JobStatus
         if cfg.require_payment_before_confirm:
-
-
-@api_router.post("/jobs/{job_id}/client-mark-payment-sent")
-async def client_mark_payment_sent(job_id: str, body: PaymentStatusIn):
-    token = body.token
-    job_doc = await db.jobs.find_one({"id": job_id})
-    if not job_doc:
-        raise HTTPException(status_code=404, detail="Job not found")
-    if token != job_doc.get("client_view_token"):
-        raise HTTPException(status_code=403, detail="Invalid token")
-
-    payment = await db.payments.find_one({"job_id": job_id}, sort=[("created_at", -1)])
-    if not payment:
-        raise HTTPException(status_code=400, detail="No payment record found")
-
-    await db.payments.update_one(
-        {"id": payment["id"]},
-        {"$set": {"status": "client_marked_sent", "updated_at": datetime.now(timezone.utc)}},
-    )
-
-    await notify_operator("client_marked_payment_sent", {"job_id": job_id, "payment_id": payment["id"]})
-
-    return {"job_id": job_id, "payment_id": payment["id"]}
-
-            new_status = "awaiting_payment"
+            new_status: JobStatus = "awaiting_payment"
         else:
             new_status = "confirmed"
     else:
