@@ -2159,10 +2159,6 @@ function ReferralPage() {
   );
 }
 
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {offers.map((j) => (
                       <div
                         key={j.id}
                         className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
