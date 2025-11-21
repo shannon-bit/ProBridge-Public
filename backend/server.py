@@ -118,6 +118,48 @@ async def get_user(user_id: str) -> Optional[UserInDB]:
     return UserInDB(**doc)
 
 
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
+
+
+async def send_smtp_email(
+    to_email: str,
+    subject: str,
+    body: str,
+    *,
+    is_html: bool = False,
+    sender_name: str = "ProBridge",
+) -> bool:
+    """Best-effort Zoho SMTP send. Never raises inside request handlers."""
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS or not EMAIL_FROM:
+        # SMTP not configured; silently skip for v1
+        return False
+    if not to_email:
+        return False
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = formataddr((sender_name, EMAIL_FROM))
+        msg["To"] = to_email
+
+        subtype = "html" if is_html else "plain"
+        part = MIMEText(body, subtype, "utf-8")
+        msg.attach(part)
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(EMAIL_FROM, [to_email], msg.as_string())
+        return True
+    except Exception:
+        # For v1, don’t break flows on email issues
+        return False
+
+
 async def authenticate_user(email: str, password: str) -> Optional[UserInDB]:
     user = await get_user_by_email(email)
     if not user:
