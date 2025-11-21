@@ -1758,6 +1758,15 @@ function ContractorDashboard() {
               <CardHeader>
                 <CardTitle className="text-base">Available Jobs</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">Browse open requests in your area.</p>
+              </CardHeader>
+              <CardContent>
+                {offers.length === 0 ? (
+                  <p className="text-sm text-slate-500" data-testid="contractor-offers-empty">
+                    No matching offers right now.
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-500">New matching-offer display coming soon.</p>
+                )}
               </CardContent>
             </Card>
           )}
