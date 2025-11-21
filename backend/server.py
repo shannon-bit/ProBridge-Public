@@ -286,6 +286,27 @@ class PricingSuggestion(BaseModel):
     source: str
 
 
+
+class ReferralCreateRequest(BaseModel):
+    # Who is being referred
+    referred_role: Literal["client", "contractor", "other"]
+    referred_name: str
+    referred_email: Optional[EmailStr] = None
+    referred_phone: Optional[str] = None
+    city_slug: Optional[str] = None
+
+    # Who is making the referral
+    referrer_role: Literal["client", "contractor", "other"]
+    referrer_name: Optional[str] = None
+    referrer_email: Optional[EmailStr] = None
+    referrer_phone: Optional[str] = None
+
+    # Extra context
+    notes: Optional[str] = None
+    referral_code: Optional[str] = None
+
+
+
 # -------------------------------------------------
 # Job models & state machine
 # -------------------------------------------------
