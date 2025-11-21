@@ -1,0 +1,28 @@
+{
+  "market": "abq",
+  "version": 1,
+  "last_updated": "2025-11-20",
+  "images": {
+    "thumbnails": {
+      "youtube": "docs/media/images/abq_thumbnail_1920x1080.png",
+      "linkedin": "docs/media/images/abq_linkedin_1200x627.png",
+      "facebook": "docs/media/images/abq_fb_1080x1080.png",
+      "instagram": "docs/media/images/abq_ig_1080x1080.png",
+      "story": "docs/media/images/abq_story_1080x1920.png",
+      "contractor_tile": "docs/media/images/abq_contractor_1080x1080.png"
+    },
+    "nano_prompts": "docs/media/prompts/abq_image_prompts.md"
+  },
+  "videos": {
+    "client_explainer_60s": "docs/media/video/abq_client_60s.mp4",
+    "contractor_explainer_45s": "docs/media/video/abq_contractor_45s.mp4",
+    "client_hooks": [],
+    "contractor_hooks": []
+  },
+  "veo_prompts": "docs/media/prompts/abq_veo_prompts.md",
+  "scripts": {
+    "client_60s": "docs/media/abq-client-explainer-script.md",
+    "contractor_45s": "docs/media/abq-contractor-explainer-script.md",
+    "social_snippets": "docs/media/abq-social-snippets.md"
+  }
+}
