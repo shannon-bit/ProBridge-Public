@@ -2176,6 +2176,7 @@ function App() {
         <Route path="/contractor/login" element={<ContractorLoginPage />} />
         <Route path="/contractor/signup" element={<ContractorSignupPage />} />
         <Route path="/contractor/dashboard" element={<ContractorDashboard />} />
+        <Route path="/referral" element={<ReferralPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
