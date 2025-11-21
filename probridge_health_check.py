@@ -61,14 +61,10 @@ class ProBridgeHealthCheck:
         url = f"{BASE_URL}{endpoint}"
         
         try:
+            # Set proper form headers
+            test_headers = {"Content-Type": "application/x-www-form-urlencoded"}
             if headers:
-                test_headers = {**headers}
-            else:
-                test_headers = {}
-            
-            # Remove Content-Type for form data
-            if 'Content-Type' in test_headers:
-                del test_headers['Content-Type']
+                test_headers.update(headers)
                 
             if method.upper() == 'POST':
                 response = self.session.post(url, data=data, params=params, headers=test_headers, timeout=30)
