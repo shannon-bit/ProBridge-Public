@@ -10,8 +10,8 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-# Backend URL from frontend/.env
-BASE_URL = "https://contractor-bridge.preview.emergentagent.com/api"
+# Backend URL for live domain testing
+BASE_URL = "https://probridge.space/api"
 
 class ProBridgeTestClient:
     def __init__(self):
