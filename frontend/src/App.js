@@ -1763,6 +1763,110 @@ function ContractorDashboard() {
                 {offers.length === 0 ? (
                   <p className="text-sm text-slate-500" data-testid="contractor-offers-empty">
                     No matching offers right now.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {offers.map((j) => (
+                      <div
+                        key={j.id}
+                        className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
+                        data-testid={`contractor-offer-${j.id}`}
+                      >
+                        <div>
+                          <div className="font-medium">{j.title || "Untitled"}</div>
+                          <div className="text-slate-500">{j.description?.slice(0, 80)}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => acceptJob(j.id)}
+                          disabled={acceptingId === j.id}
+                          data-testid={`contractor-accept-${j.id}`}
+                        >
+                          {acceptingId === j.id ? "Accepting…" : "Accept job"}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {tab === "jobs" && (
+            <Card data-testid="contractor-jobs-card">
+              <CardHeader>
+                <CardTitle className="text-base">Your Jobs</CardTitle>
+                <p className="mt-1 text-xs text-slate-500">
+                  Your active jobs. Complete the tasks and enter a note when done.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-3">
+                  <label className="text-xs text-slate-600" htmlFor="completion-note" data-testid="completion-note-label">
+                    Completion note
+                  </label>
+                  <Textarea
+                    id="completion-note"
+                    rows={2}
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                    data-testid="completion-note-input"
+                  />
+                </div>
+                {jobs.length === 0 ? (
+                  <p className="text-sm text-slate-500" data-testid="contractor-jobs-empty">
+                    You haven&apos;t accepted any jobs yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {jobs.map((j) => (
+                      <div
+                        key={j.id}
+                        className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
+                        data-testid={`contractor-job-${j.id}`}
+                      >
+                        <div>
+                          <div className="font-medium">{j.title || "Untitled"}</div>
+                          <div className="text-slate-500">Status: {j.status}</div>
+                        </div>
+                        {(j.status === "confirmed" || j.status === "in_progress") && (
+                          <Button
+                            size="sm"
+                            onClick={() => markCompleted(j.id)}
+                            disabled={savingJobId === j.id}
+                            data-testid={`contractor-complete-${j.id}`}
+                          >
+                            {savingJobId === j.id ? "Saving…" : "Mark completed"}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      </main>
+
+      {/* Bottom portal & referral strip */}
+      <footer className="app-footer-portals" aria-label="ProBridge portals">
+        <div className="app-footer-portals-inner">
+          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
+            Operator
+          </a>
+          <a href="/contractor" className="app-header-link" data-testid="nav-contractor-portal">
+            Contractors
+          </a>
+          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
+            Referral
+          </a>
+        </div>
+      </footer>
+      <Toaster />
+    </div>
+  );
+}
 
 // ------------------------
 // Referral page
