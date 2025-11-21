@@ -1931,7 +1931,7 @@ function ReferralPage() {
       <main className="app-main">
         <section className="app-hero-grid">
           <div>
-            <div className="app-hero-title">Clients, contractors, or others  all welcome.</div>
+            <div className="app-hero-title">Clients, contractors, or others — all welcome.</div>
             <p className="app-hero-subtitle">
               Use this form to refer a homeowner, a contractor, or share an opportunity that doesnt quite fit our
               current categories. Add details below and well route it.
