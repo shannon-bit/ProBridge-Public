@@ -1,0 +1,29 @@
+{
+  "city": "abq",
+  "category_slug": "furniture-assembly",
+  "mode": "quote",
+  "style": "per_item_with_minimum",
+  "currency": "USD",
+  "base_price": 160,
+  "platform_fee_pct": 25.0,
+  "description": "Furniture assembly priced per item type, with a minimum visit fee.",
+  "questions": [
+    "What type of furniture needs to be assembled (bed, dresser, table, etc.)?",
+    "How many pieces in total?",
+    "Is the furniture new in box, or partially assembled/disassembled?",
+    "Will the work be done in an apartment, house, or office (any access issues)?"
+  ],
+  "item_rates": [
+    { "code": "bed_frame",   "label": "Bed frame",           "unit_price": 80 },
+    { "code": "dresser",     "label": "Dresser",             "unit_price": 70 },
+    { "code": "table",       "label": "Table or desk",       "unit_price": 60 },
+    { "code": "chair_set",   "label": "Set of up to 4 chairs","unit_price": 75 },
+    { "code": "other",       "label": "Other item",          "unit_price": 65 }
+  ],
+  "minimum_visit_price": 160,
+  "operator_guidance": [
+    "Estimate total by multiplying item counts by their unit prices, then enforce the minimum_visit_price.",
+    "For complex items (Murphy beds, large wardrobes), treat as multiple standard items or add a safety margin.",
+    "Communicate clearly what is included (assembly only vs. moving/anchoring to walls)."
+  ]
+}
