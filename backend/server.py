@@ -836,6 +836,10 @@ class ApproveQuoteResponse(BaseModel):
     status: JobStatus
 
 
+class PaymentStatusIn(BaseModel):
+    token: str
+
+
 @api_router.post("/jobs/{job_id}/approve-quote", response_model=ApproveQuoteResponse)
 async def approve_quote(job_id: str, token: str = Body(..., embed=True), request: Request = None):  # type: ignore[assignment]
     job_doc = await db.jobs.find_one({"id": job_id})
