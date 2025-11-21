@@ -190,6 +190,51 @@
 }
 
 .app-footer-portals-inner {
+.app-footer-pill {
+    border: none;
+    background: #ffffff;
+    padding: 0.32rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    font-size: 0.78rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.app-footer-pill-active {
+    background: #111827;
+    color: #f9fafb;
+    border-color: #111827;
+}
+
+.app-footer-portals-menu {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.app-footer-menu-link {
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    text-decoration: none;
+}
+
+.app-footer-menu-link:hover {
+    background: #e5e7eb;
+}
+
+.app-footer-menu-note {
+    flex-basis: 100%;
+    text-align: center;
+    color: #6b7280;
+}
+
     display: flex;
     justify-content: center;
     gap: 0.5rem;
