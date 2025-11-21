@@ -1,0 +1,37 @@
+{
+  "city": "abq",
+  "category_slug": "handyman",
+  "mode": "quote",
+  "style": "time_and_materials_with_minimum",
+  "currency": "USD",
+  "base_price": 200,
+  "platform_fee_pct": 25.0,
+  "description": "Handyman work priced as a flat visit fee covering first hour, plus optional additional hours.",
+  "questions": [
+    "What are the 1–3 main tasks you need done?",
+    "Do you already have all required materials (fixtures, hardware, etc.)?",
+    "Are there any access limitations (gates, parking, pets, building rules)?"
+  ],
+  "line_items_schema": {
+    "visit_fee": {
+      "code": "visit_fee",
+      "label": "On-site visit and first hour of work",
+      "unit": "visit",
+      "default_quantity": 1,
+      "unit_price": 200,
+      "required": true
+    },
+    "additional_hour": {
+      "code": "additional_hour",
+      "label": "Additional labor hour",
+      "unit": "hour",
+      "unit_price": 95,
+      "required": false
+    }
+  },
+  "operator_guidance": [
+    "Keep quotes simple: visit_fee plus a rough estimate of additional_hour based on complexity.",
+    "Round up to the nearest 25 dollars where possible to keep pricing clean.",
+    "Do not expose platform fees separately to the client; quote a single all-in price."
+  ]
+}
