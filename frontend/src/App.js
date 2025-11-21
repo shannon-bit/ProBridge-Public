@@ -70,6 +70,87 @@ function useAuth(roleKey) {
     }
   }
 
+
+// ------------------------
+// Shared footer portals
+// ------------------------
+
+function FooterPortals() {
+  const [active, setActive] = React.useState(null);
+
+  const toggle = (name) => {
+    setActive((prev) => (prev === name ? null : name));
+  };
+
+  return (
+    <footer className="app-footer-portals" aria-label="ProBridge portals">
+      <div className="app-footer-portals-inner">
+        <button
+          type="button"
+          className={`app-footer-pill ${active === "client" ? "app-footer-pill-active" : ""}`}
+          onClick={() => toggle("client")}
+          data-testid="footer-pill-client"
+        >
+          Client
+        </button>
+        <button
+          type="button"
+          className={`app-footer-pill ${active === "contractor" ? "app-footer-pill-active" : ""}`}
+          onClick={() => toggle("contractor")}
+          data-testid="footer-pill-contractor"
+        >
+          Contractor
+        </button>
+        <button
+          type="button"
+          className={`app-footer-pill ${active === "operator" ? "app-footer-pill-active" : ""}`}
+          onClick={() => toggle("operator")}
+          data-testid="footer-pill-operator"
+        >
+          Operator
+        </button>
+        <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
+          Referral
+        </a>
+      </div>
+
+      {active === "client" && (
+        <div className="app-footer-portals-menu" data-testid="footer-client-menu">
+          <a href="/" className="app-footer-menu-link" data-testid="footer-client-signup">
+            Client Sign Up
+          </a>
+          <a href="/client/login" className="app-footer-menu-link" data-testid="footer-client-login">
+            Client Log In
+          </a>
+          <span className="app-footer-menu-note">
+            For now, clients use their unique status link from email/text to return to a job.
+          </span>
+        </div>
+      )}
+
+      {active === "contractor" && (
+        <div className="app-footer-portals-menu" data-testid="footer-contractor-menu">
+          <a href="/contractor/signup" className="app-footer-menu-link" data-testid="footer-contractor-signup">
+            Contractor Sign Up
+          </a>
+          <a href="/contractor/login" className="app-footer-menu-link" data-testid="footer-contractor-login">
+            Contractor Log In
+          </a>
+        </div>
+      )}
+
+      {active === "operator" && (
+        <div className="app-footer-portals-menu" data-testid="footer-operator-menu">
+          <a href="/operator/login" className="app-footer-menu-link" data-testid="footer-operator-login">
+            Operator Log In
+          </a>
+          <span className="app-footer-menu-note">Operator accounts are created internally.</span>
+        </div>
+      )}
+    </footer>
+  );
+}
+
   return { token, saveToken };
 }
 
