@@ -572,20 +572,6 @@ async def send_contractor_job_offer_email(contractor_user: Dict[str, Any], job: 
     await send_smtp_email(email, subject, body)
 
 
-        await on_job_created_handler(job)
-    if new_status == "quote_sent":
-        await on_quote_sent_handler(job)
-    if new_status == "completed":
-        await on_job_completed_handler(job)
-
-    return job
-
-
-# Helper to fetch contractor profile for a user
-async def get_contractor_profile_for_user(user_id: str) -> Optional[Dict[str, Any]]:
-    return await db.contractor_profiles.find_one({"user_id": user_id})
-
-
 # -------------------------------------------------
 # Event Handlers (simplified for v1)
 # -------------------------------------------------
