@@ -1,0 +1,27 @@
+{
+  "city": "abq",
+  "category_slug": "moving",
+  "mode": "quote",
+  "style": "hourly_crew_with_minimum",
+  "currency": "USD",
+  "base_price": 250,
+  "platform_fee_pct": 25.0,
+  "description": "Small moves priced as a minimum crew-hour block plus estimated additional hours.",
+  "questions": [
+    "Is this within ABQ city limits or longer distance?",
+    "What is being moved (number of rooms / large items)?",
+    "Are there stairs, elevators, or difficult access at either location?",
+    "Do you need packing help or just load/drive/unload?"
+  ],
+  "crew_config": {
+    "default_crew_size": 2,
+    "min_hours": 2,
+    "hourly_rate_per_mover": 75
+  },
+  "operator_guidance": [
+    "Start with a 2-mover, 2-hour minimum for standard small moves within ABQ.",
+    "Increase estimated hours for stairs, long walks, or heavy/bulky items.",
+    "Consider a 3rd mover or longer minimum for jobs with many stairs or long carrying distances.",
+    "Quote a single estimated total; do not present per-mover math to the client."
+  ]
+}
