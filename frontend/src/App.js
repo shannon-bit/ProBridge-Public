@@ -408,6 +408,10 @@ function ClientHomePage() {
                     Open status page
                   </a>
                 )}
+              <p className="mt-1 text-[11px] text-slate-500" data-testid="status-link-hint">
+                Tip: after opening the status page, add it to your home screen or bookmarks so you can return to it like an app.
+              </p>
+
               </div>
             </form>
           </div>
