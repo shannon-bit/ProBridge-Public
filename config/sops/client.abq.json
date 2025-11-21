@@ -1,0 +1,60 @@
+{
+  "role": "client",
+  "market": "abq",
+  "version": 1,
+  "last_updated": "2025-11-20",
+  "summary": "Client-facing SOP for requesting, approving, and completing jobs in ProBridge ABQ.",
+  "live_url": "https://local-bridge.emergent.host",
+  "sections": [
+    {
+      "id": "requesting_a_job",
+      "title": "Requesting a Job",
+      "steps": [
+        { "order": 1, "text": "Visit the ProBridge ABQ request page and select the service category that best matches your project (e.g., handyman, cleaning, moving)." },
+        { "order": 2, "text": "Enter your ABQ address, preferred time window, and a clear description of the work that needs to be done." },
+        { "order": 3, "text": "Provide your name, email, and phone number so we can send you a quote and updates." },
+        { "order": 4, "text": "Submit the request. You will receive a link to track your job and view your quote once it is prepared." }
+      ]
+    },
+    {
+      "id": "reviewing_and_approving_quote",
+      "title": "Reviewing and Approving Your Quote",
+      "steps": [
+        { "order": 1, "text": "When your quote is ready, open the job status link sent to your email or SMS." },
+        { "order": 2, "text": "Review the all-in price and the summary of the scope of work." },
+        { "order": 3, "text": "If anything looks unclear or out of scope, contact support or reply to the message before approving." },
+        { "order": 4, "text": "If you are satisfied, approve the quote and proceed to Stripe Checkout to complete payment." }
+      ]
+    },
+    {
+      "id": "day_of_job",
+      "title": "Day-of-Job Expectations",
+      "steps": [
+        { "order": 1, "text": "Ensure someone is available at the property during the agreed time window." },
+        { "order": 2, "text": "Prepare the work area where possible to avoid delays (e.g., clear furniture, secure pets)." },
+        { "order": 3, "text": "Communicate any last-minute changes as early as possible through the provided contact channels." }
+      ]
+    },
+    {
+      "id": "completion_and_feedback",
+      "title": "Completion and Feedback",
+      "steps": [
+        { "order": 1, "text": "After the work is completed, verify that the main items discussed in the scope have been addressed." },
+        { "order": 2, "text": "If there are minor issues, raise them directly during the visit or via support shortly after completion." },
+        { "order": 3, "text": "Provide feedback or rating for the contractor if prompted; this helps improve matching for future jobs." }
+      ]
+    },
+    {
+      "id": "changes_and_cancellations",
+      "title": "Changes and Cancellations",
+      "steps": [
+        { "order": 1, "text": "If you need to change the scheduled time, request a change as early as possible so the operator and contractor can adjust." },
+        { "order": 2, "text": "If you need to cancel, contact support and reference your job ID; the operator will explain any applicable policies." }
+      ]
+    }
+  ],
+  "notes": [
+    "Clients in ABQ interact primarily with the request form, quote page, and Stripe Checkout.",
+    "All pricing shown to clients is a single, all-in number for the agreed scope of work."
+  ]
+}
