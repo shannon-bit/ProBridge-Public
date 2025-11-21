@@ -22,6 +22,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.j
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Marketing/media assets (hosted images)
+const HERO_IMAGE_URL = "https://customer-assets.emergentagent.com/job_contractor-bridge/artifacts/54otv3nm_Gemini_Generated_Image_qg5ddjqg5ddjqg5d.jpg";
+const CONTRACTOR_IMAGE_URL = "https://customer-assets.emergentagent.com/job_contractor-bridge/artifacts/nn258w7m_Gemini_Generated_Image_5epqab5epqab5epq.jpg";
+
 axios.defaults.baseURL = API;
 
 // ------------------------
