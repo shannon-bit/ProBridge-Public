@@ -1,0 +1,83 @@
+{
+  "role": "operator",
+  "market": "abq",
+  "version": 1,
+  "last_updated": "2025-11-20",
+  "summary": "Operator SOP for running ProBridge ABQ: intake, quoting, assignment, completion, payouts, and exceptions.",
+  "live_url": "https://local-bridge.emergent.host",
+  "pricing_reference": "config/pricing/abq.json",
+  "city_config_reference": "config/cities/abq.json",
+  "sections": [
+    {
+      "id": "intake",
+      "title": "Intake",
+      "steps": [
+        { "order": 1, "text": "Open the operator console and filter jobs to city_slug = 'abq'." },
+        { "order": 2, "text": "For each new job, confirm the address is within the ABQ service radius (see config/cities/abq.json)." },
+        { "order": 3, "text": "Verify the selected service_category_slug (handyman, cleaning, moving, etc.) matches the actual request." },
+        { "order": 4, "text": "Reject or clarify any out-of-scope or unclear requests before quoting." }
+      ]
+    },
+    {
+      "id": "quoting",
+      "title": "Quoting",
+      "steps": [
+        { "order": 1, "text": "Review estimator suggestions (time, complexity, materials) for the job." },
+        { "order": 2, "text": "Check the ABQ pricing table in config/pricing/abq.json for the relevant category base_price." },
+        { "order": 3, "text": "Set a single all-in job price for the client; do not show platform_fee as a separate line." },
+        { "order": 4, "text": "Do not go below base_price without adding an internal note explaining the reason (discount, error correction, etc.)." },
+        { "order": 5, "text": "Send the quote to the client and move the job status to 'quoted'." }
+      ]
+    },
+    {
+      "id": "payment",
+      "title": "Payment",
+      "steps": [
+        { "order": 1, "text": "Monitor for client approval and Stripe Checkout completion." },
+        { "order": 2, "text": "Once payment is captured, confirm the job status updates to 'approved'." },
+        { "order": 3, "text": "If payment fails, contact the client and either retry payment or cancel the job with notes." }
+      ]
+    },
+    {
+      "id": "assignment",
+      "title": "Assignment",
+      "steps": [
+        { "order": 1, "text": "After payment, broadcast the job to eligible contractors in ABQ for that category." },
+        { "order": 2, "text": "Prefer contractors with strong rating, low cancellation rate, and proximity to the job location." },
+        { "order": 3, "text": "When a contractor accepts, set the job status to 'assigned' and confirm that details are visible in the contractor portal." }
+      ]
+    },
+    {
+      "id": "in_progress_and_completion",
+      "title": "In Progress & Completion",
+      "steps": [
+        { "order": 1, "text": "Monitor jobs in 'in_progress' status for unusual delays or contractor issues." },
+        { "order": 2, "text": "When contractor reports completion (and/or client confirms), verify basic quality and close any open questions." },
+        { "order": 3, "text": "Mark the job status as 'completed' in the operator console." }
+      ]
+    },
+    {
+      "id": "payouts",
+      "title": "Payouts",
+      "steps": [
+        { "order": 1, "text": "For completed jobs, review payout entries via the payouts dashboard or API." },
+        { "order": 2, "text": "Confirm quote_total, platform_cut, and contractor_payout are consistent with ABQ pricing and platform_fee_pct." },
+        { "order": 3, "text": "Initiate payouts via the configured payout method (e.g., Stripe Connect) within the target payout window (e.g., 24 hours)." },
+        { "order": 4, "text": "Mark payouts as 'paid' once transfer is confirmed; set 'failed' if the payout does not complete and add notes." }
+      ]
+    },
+    {
+      "id": "exceptions",
+      "title": "Exception Handling",
+      "steps": [
+        { "order": 1, "text": "If a contractor no-shows, reassign the job to another contractor or reschedule with the client and document the incident." },
+        { "order": 2, "text": "If the client requests a refund, determine whether a partial or full refund is appropriate and record the reasoning in internal notes." },
+        { "order": 3, "text": "For any serious incident (safety, repeated failures), create an 'Ops incident' issue in GitHub using the ops incident template." }
+      ]
+    }
+  ],
+  "notes": [
+    "ABQ is the initial live market; follow these procedures unless superseded by market-specific policies.",
+    "Pricing and city configuration are defined in JSON under config/pricing and config/cities."
+  ]
+}
