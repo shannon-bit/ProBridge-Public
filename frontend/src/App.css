@@ -177,6 +177,10 @@
 }
 
 .app-divider-label {
+    margin: 1.25rem 0 0.7rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
 }
 
 .app-footer-portals {
