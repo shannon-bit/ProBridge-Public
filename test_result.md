@@ -105,9 +105,9 @@
 ## backend:
   - task: "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -117,6 +117,9 @@
       - working: true
         agent: "testing"
         comment: "✅ CORE MONEY LOOP FUNCTIONAL - Comprehensive testing completed successfully. All major backend flows working: 1) Client job creation ✅, 2) Contractor signup/login ✅, 3) Job matching with active contractors ✅, 4) Contractor offer acceptance ✅, 5) Operator quote creation/sending ✅, 6) Client quote approval ✅, 7) Job state transitions working correctly (new->offering_contractors->awaiting_quote->quote_sent). Stripe checkout session creation works but uses placeholder API keys (expected). Authentication system fully functional. Database operations working. Minor: Some 500 errors on quote creation due to Stripe placeholder keys, but core flow completes successfully. Backend deployed at contractor-bridge.preview.emergentagent.com is fully operational for the money loop."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE ON LIVE DOMAIN - Comprehensive testing against https://probridge.space/api reveals operator quote creation failure: POST /api/operator/jobs/{job_id}/quotes returns HTTP 500 Internal Server Error, blocking the core money loop. WORKING: ✅ Job creation (ABQ + valid service categories), ✅ Estimator (pricing_suggestion from config/pricing/abq.json), ✅ Operator login (operator@probridge.space), ✅ Contractor signup/dashboard (full functionality). BROKEN: ❌ Operator quote creation (500 error), ❌ Stripe session creation (blocked by quote failure). Root cause analysis needed for quote creation endpoint - likely database/backend logic issue on production deployment."
 ## frontend:
   - task: "Frontend flows for client, contractor, operator portals"
     implemented: true
