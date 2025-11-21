@@ -1,0 +1,12 @@
+{
+  "city": "abq",
+  "currency": "USD",
+  "rules": [
+    { "slug": "handyman", "base_price": 200, "platform_fee_pct": 25.0 },
+    { "slug": "cleaning", "base_price": 180, "platform_fee_pct": 25.0 },
+    { "slug": "moving", "base_price": 250, "platform_fee_pct": 25.0 },
+    { "slug": "furniture-assembly", "base_price": 160, "platform_fee_pct": 25.0 },
+    { "slug": "home-repair", "base_price": 220, "platform_fee_pct": 25.0 }
+  ],
+  "notes": "Baseline pricing for ABQ v1. Backend currently seeds categories in code; this file is the canonical reference for pricing and future estimator logic."
+}
