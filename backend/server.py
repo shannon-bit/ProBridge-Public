@@ -1197,6 +1197,60 @@ async def operator_contractors(
 async def mark_payout_paid(payout_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
     _ = current_user
     payout = await db.payouts.find_one({"id": payout_id})
+
+# ---------------------------
+# Referral intake
+# ---------------------------
+
+
+@api_router.post("/referrals")
+async def create_referral(body: ReferralCreateRequest, request: Request):
+    now = datetime.now(timezone.utc)
+
+    # Try to map city_slug to city_id if provided
+    city_id = None
+    if body.city_slug:
+        city = await db.cities.find_one({"slug": body.city_slug})
+        if city:
+            city_id = city["id"]
+
+    referral_id = str(uuid.uuid4())
+    doc = {
+        "id": referral_id,
+        "referred_role": body.referred_role,
+        "referred_name": body.referred_name,
+        "referred_email": body.referred_email,
+        "referred_phone": body.referred_phone,
+        "city_id": city_id,
+        "city_slug": body.city_slug,
+        "referrer_role": body.referrer_role,
+        "referrer_name": body.referrer_name,
+        "referrer_email": body.referrer_email,
+        "referrer_phone": body.referrer_phone,
+        "notes": body.notes,
+        "referral_code": body.referral_code,
+        "created_at": now,
+        "source": "web",
+        "request_path": str(request.url.path),
+    }
+
+    await db.referrals.insert_one(doc)
+
+    # Create a simple operator notification
+    await notify_operator(
+        "new_referral_submitted",
+        {
+            "referral_id": referral_id,
+            "referred_name": body.referred_name,
+            "referred_role": body.referred_role,
+            "referrer_name": body.referrer_name,
+            "referrer_role": body.referrer_role,
+        },
+    )
+
+    return {"id": referral_id}
+
+
     if not payout:
         raise HTTPException(status_code=404, detail="Payout not found")
     if payout.get("status") == "paid":
