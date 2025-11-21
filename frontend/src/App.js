@@ -2044,7 +2044,7 @@ function ReferralPage() {
               <div className="app-input-row">
                 <div>
                   <label className="text-xs text-slate-600" htmlFor="referrer-role">
-                    You are af
+                    You are a
                   </label>
                   <Select
                     onValueChange={(v) => onChange("referrer_role")({ target: { value: v } })}
