@@ -518,6 +518,47 @@ async def transition_job_status(
 
     # Trigger basic handlers
     if new_status == "offering_contractors":
+
+async def send_client_job_received_email(job: Job, client_email: Optional[str]):
+    if not client_email:
+        return
+    status_url = f"https://probridge.space/jobs/{job.id}/status?token={job.client_view_token}"
+    subject = "We received your ProBridge request"
+    body = (
+        f"Hi {job.id[:8]},\n\n"
+        f"Thanks for submitting your request with ProBridge. "
+        f"You can check the status of this job and any quotes at this link:\n{status_url}\n\n"
+        "— ProBridge"
+    )
+    await send_smtp_email(client_email, subject, body)
+
+
+async def send_client_quote_ready_email(job: Job, client_email: Optional[str]):
+    if not client_email:
+        return
+    status_url = f"https://probridge.space/jobs/{job.id}/status?token={job.client_view_token}"
+    subject = "Your ProBridge quote is ready"
+    body = (
+        f"Hi {job.id[:8]},\n\n"
+        "Your quote is ready. Review and approve it here:\n"
+        f"{status_url}\n\n— ProBridge"
+    )
+    await send_smtp_email(client_email, subject, body)
+
+
+async def send_contractor_job_offer_email(contractor_user: Dict[str, Any], job: Job):
+    email = contractor_user.get("email")
+    if not email:
+        return
+    subject = "New ProBridge job offer in your area"
+    body = (
+        f"Hi {contractor_user.get('name') or 'there'},\n\n"
+        "You have a new job offer available in your ProBridge dashboard. "
+        "Log in to review details and accept it if you’re interested.\n\n— ProBridge"
+    )
+    await send_smtp_email(email, subject, body)
+
+
         await on_job_created_handler(job)
     if new_status == "quote_sent":
         await on_quote_sent_handler(job)
