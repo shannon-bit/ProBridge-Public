@@ -1894,7 +1894,7 @@ function ReferralPage() {
       await axios.post("/referrals", payload);
       toast({
         title: "Thanks for the referral!",
-        description: "Well review and follow up from here.",
+        description: "We’ll review and follow up from here.",
       });
       setForm((prev) => ({
         ...prev,
