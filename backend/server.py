@@ -579,6 +579,10 @@ async def get_contractor_profile_for_user(user_id: str) -> Optional[Dict[str, An
 
 
 async def on_job_created_handler(job: Job) -> None:
+    # Email client that their job was received (best-effort)
+    client = await db.users.find_one({"id": job.client_id})
+    await send_client_job_received_email(job, client.get("email") if client else None)
+
     # Simple contractor matching by city & service_category
     contractors = (
         await db.contractor_profiles.find(
@@ -591,7 +595,7 @@ async def on_job_created_handler(job: Job) -> None:
         ).to_list(50)
     )
     if not contractors:
-        await db.jobs.update_one({"id": job.id}, {"$set": {"status": "no_contractor_found"}})
+        await db.jobs.update_one({"id": job.id}, {"$set": {"status": "no_contractor_found", "updated_at": datetime.now(timezone.utc)}})
         await create_job_event(job.id, "no_contractor_found", "system", None, {})
         await notify_operator("operator_no_contractor_found", {"job_id": job.id})
         return
@@ -599,10 +603,13 @@ async def on_job_created_handler(job: Job) -> None:
     # Mark job as offering to contractors
     await db.jobs.update_one({"id": job.id}, {"$set": {"status": "offering_contractors", "updated_at": datetime.now(timezone.utc)}})
 
-    # Notify top N contractors
+    # Notify top N contractors (in-app + email)
     top_n = 3
     for c in contractors[:top_n]:
         await notify_contractor(c["id"], "contractor_new_offer", {"job_id": job.id})
+        # also email contractor user
+        user = await db.users.find_one({"id": c.get("user_id")})
+        await send_contractor_job_offer_email(user or {}, job)
     await create_job_event(job.id, "contractor_offers_prepared", "system", None, {"count": len(contractors)})
 
 
