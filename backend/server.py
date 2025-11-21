@@ -1197,6 +1197,26 @@ async def operator_contractors(
 async def mark_payout_paid(payout_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
     _ = current_user
     payout = await db.payouts.find_one({"id": payout_id})
+    if not payout:
+        raise HTTPException(status_code=404, detail="Payout not found")
+    if payout.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Payout already marked as paid")
+
+    now = datetime.now(timezone.utc)
+    await db.payouts.update_one(
+        {"id": payout_id},
+        {"$set": {"status": "paid", "paid_at": now}},
+    )
+
+    contractor_id = payout.get("contractor_id")
+    amount = int(payout.get("amount_cents", 0))
+    if contractor_id:
+        await db.contractor_profiles.update_one(
+            {"id": contractor_id},
+            {"$inc": {"completed_jobs_count": 1, "total_earnings_cents": amount}},
+        )
+
+    return {"payout_id": payout_id, "status": "paid"}
 
 # ---------------------------
 # Referral intake
