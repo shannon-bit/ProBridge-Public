@@ -33,7 +33,7 @@
 }
 
 .app-header-nav {
-    display: flex;
+    display: none;
     gap: 0.5rem;
     font-size: 0.78rem;
 }
