@@ -500,22 +500,7 @@ function ClientHomePage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -669,22 +654,7 @@ function JobStatusPage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -799,22 +769,7 @@ function OperatorLoginPage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1245,22 +1200,7 @@ function OperatorDashboard() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1314,22 +1254,7 @@ function ContractorWelcomePage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1390,22 +1315,7 @@ function ContractorLoginPage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1728,22 +1638,7 @@ function ContractorSignupPage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1939,22 +1834,7 @@ function ContractorDashboard() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -2233,22 +2113,7 @@ function ReferralPage() {
       </main>
 
       {/* Bottom portal & referral strip */}
-      <footer className="app-footer-portals" aria-label="ProBridge portals">
-        <div className="app-footer-portals-inner">
-          <a href="/contractor/signup" className="app-header-link" data-testid="nav-contractor-signup">
-            Contractor Sign Up
-          </a>
-          <a href="/contractor/login" className="app-header-link" data-testid="nav-contractor-login">
-            Contractor Log In
-          </a>
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator Log In
-          </a>
-          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
-            Referral
-          </a>
-        </div>
-      </footer>
+      <FooterPortals />
       <Toaster />
     </div>
   );
