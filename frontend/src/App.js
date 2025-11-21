@@ -1763,6 +1763,298 @@ function ContractorDashboard() {
                 {offers.length === 0 ? (
                   <p className="text-sm text-slate-500" data-testid="contractor-offers-empty">
                     No matching offers right now.
+
+// ------------------------
+// Referral page
+// ------------------------
+
+function ReferralPage() {
+  const { toast } = useToast();
+  const { cities } = useCitiesAndCategories();
+  const [submitting, setSubmitting] = React.useState(false);
+  const [form, setForm] = React.useState({
+    referred_role: "contractor",
+    referred_name: "",
+    referred_email: "",
+    referred_phone: "",
+    city_slug: "",
+    referrer_role: "client",
+    referrer_name: "",
+    referrer_email: "",
+    referrer_phone: "",
+    notes: "",
+    referral_code: "",
+  });
+
+  const onChange = (field) => (e) => {
+    const value = e?.target ? e.target.value : e;
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const payload = {
+        referred_role: form.referred_role,
+        referred_name: form.referred_name,
+        referred_email: form.referred_email || undefined,
+        referred_phone: form.referred_phone || undefined,
+        city_slug: form.city_slug || undefined,
+        referrer_role: form.referrer_role,
+        referrer_name: form.referrer_name || undefined,
+        referrer_email: form.referrer_email || undefined,
+        referrer_phone: form.referrer_phone || undefined,
+        notes: form.notes || undefined,
+        referral_code: form.referral_code || undefined,
+      };
+      await axios.post("/referrals", payload);
+      toast({
+        title: "Thanks for the referral!",
+        description: "Well review and follow up from here.",
+      });
+      setForm((prev) => ({
+        ...prev,
+        referred_name: "",
+        referred_email: "",
+        referred_phone: "",
+        city_slug: "",
+        referrer_name: "",
+        referrer_email: "",
+        referrer_phone: "",
+        notes: "",
+        referral_code: "",
+      }));
+    } catch (err) {
+      console.error("Referral submit error", err);
+      toast({
+        title: "There was a problem",
+        description: "Please try again in a moment.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <div>
+          <div className="app-header-title">Refer someone to ProBridge</div>
+          <div className="app-tagline">Know a great local pro? Refer them to ProBridge.</div>
+        </div>
+      </header>
+
+      <main className="app-main">
+        <section className="app-hero-grid">
+          <div>
+            <div className="app-hero-title">Clients, contractors, or others  all welcome.</div>
+            <p className="app-hero-subtitle">
+              Use this form to refer a homeowner, a contractor, or share an opportunity that doesnt quite fit our
+              current categories. Add details below and well route it.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <div className="app-panel" data-testid="referral-panel">
+            <div className="app-panel-header">
+              <div>
+                <div className="app-panel-title">Who are you referring?</div>
+                <div className="app-panel-subtitle">Tell us about the person or business youre sending our way.</div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4" data-testid="referral-form">
+              <div className="app-input-row">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referred-role">
+                    Referred person is af
+                  </label>
+                  <Select
+                    onValueChange={(v) => onChange("referred_role")({ target: { value: v } })}
+                    value={form.referred_role}
+                  >
+                    <SelectTrigger id="referred-role">
+                      <SelectValue placeholder="Choose a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client">Client / homeowner</SelectItem>
+                      <SelectItem value="contractor">Contractor / service pro</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="city-referral">
+                    City (optional)
+                  </label>
+                  <Select
+                    onValueChange={(v) => onChange("city_slug")({ target: { value: v } })}
+                    value={form.city_slug}
+                  >
+                    <SelectTrigger id="city-referral">
+                      <SelectValue placeholder="Select city (if known)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities.map((c) => (
+                        <SelectItem key={c.id} value={c.slug}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="app-input-row">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referred-name">
+                    Referred name
+                  </label>
+                  <Input
+                    id="referred-name"
+                    value={form.referred_name}
+                    onChange={onChange("referred_name")}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referred-email">
+                    Referred email (optional)
+                  </label>
+                  <Input
+                    id="referred-email"
+                    type="email"
+                    value={form.referred_email}
+                    onChange={onChange("referred_email")}
+                  />
+                </div>
+              </div>
+
+              <div className="app-input-row">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referred-phone">
+                    Referred phone (optional)
+                  </label>
+                  <Input
+                    id="referred-phone"
+                    value={form.referred_phone}
+                    onChange={onChange("referred_phone")}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referral-code">
+                    Referral code (optional)
+                  </label>
+                  <Input
+                    id="referral-code"
+                    value={form.referral_code}
+                    onChange={onChange("referral_code")}
+                  />
+                </div>
+              </div>
+
+              <div className="app-divider-label">About you</div>
+
+              <div className="app-input-row">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referrer-role">
+                    You are af
+                  </label>
+                  <Select
+                    onValueChange={(v) => onChange("referrer_role")({ target: { value: v } })}
+                    value={form.referrer_role}
+                  >
+                    <SelectTrigger id="referrer-role">
+                      <SelectValue placeholder="Choose a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client">Client / homeowner</SelectItem>
+                      <SelectItem value="contractor">Contractor / service pro</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referrer-name">
+                    Your name (optional)
+                  </label>
+                  <Input
+                    id="referrer-name"
+                    value={form.referrer_name}
+                    onChange={onChange("referrer_name")}
+                  />
+                </div>
+              </div>
+
+              <div className="app-input-row">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referrer-email">
+                    Your email (optional)
+                  </label>
+                  <Input
+                    id="referrer-email"
+                    type="email"
+                    value={form.referrer_email}
+                    onChange={onChange("referrer_email")}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="referrer-phone">
+                    Your phone (optional)
+                  </label>
+                  <Input
+                    id="referrer-phone"
+                    value={form.referrer_phone}
+                    onChange={onChange("referrer_phone")}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-600" htmlFor="notes">
+                  Anything outside what we currently list?
+                </label>
+                <Textarea
+                  id="notes"
+                  rows={4}
+                  placeholder="Share any extra context, especially if this is outside our current service categories."
+                  value={form.notes}
+                  onChange={onChange("notes")}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={submitting} data-testid="referral-submit">
+                  {submitting ? "Sending…" : "Send referral"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      {/* Bottom portal & referral strip */}
+      <footer className="app-footer-portals" aria-label="ProBridge portals">
+        <div className="app-footer-portals-inner">
+          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
+            Operator
+          </a>
+          <a href="/contractor" className="app-header-link" data-testid="nav-contractor-portal">
+            Contractors
+          </a>
+          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
+            Referral
+          </a>
+        </div>
+      </footer>
+      <Toaster />
+    </div>
+  );
+}
+
                   </p>
                 ) : (
                   <div className="space-y-2">
