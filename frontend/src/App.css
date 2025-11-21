@@ -158,5 +158,31 @@
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.13em;
+
+.app-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 1.75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .app-hero-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.app-hero-image-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.app-hero-image {
+    max-width: 100%;
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+}
+
     color: #9ca3af;
 }
