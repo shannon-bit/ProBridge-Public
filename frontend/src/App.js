@@ -1124,8 +1124,17 @@ function ContractorWelcomePage() {
       <main className="app-main">
         <section>
           <Card data-testid="contractor-welcome-card">
-            <CardHeader>
-              <CardTitle className="text-base">Earn on your schedule. We connect you with local customers.</CardTitle>
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Earn on your schedule. We connect you with local customers.</CardTitle>
+              </div>
+              <div className="w-full md:w-40">
+                <img
+                  src={CONTRACTOR_IMAGE_URL}
+                  alt="ABQ pros: get jobs, not leads"
+                  className="w-full rounded-md object-cover"
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <Button
