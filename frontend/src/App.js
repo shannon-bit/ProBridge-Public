@@ -1944,7 +1944,7 @@ function ReferralPage() {
             <div className="app-panel-header">
               <div>
                 <div className="app-panel-title">Who are you referring?</div>
-                <div className="app-panel-subtitle">Tell us about the person or business youre sending our way.</div>
+                <div className="app-panel-subtitle">Tell us about the person or business you’re sending our way.</div>
               </div>
             </div>
 
