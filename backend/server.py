@@ -922,7 +922,7 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
             "method": "offline",
         }
         await db.payments.insert_one(payment_doc)
-        new_status = "awaiting_payment"
+        new_status: JobStatus = "awaiting_payment"
 
     await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
 
