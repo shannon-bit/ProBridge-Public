@@ -42,6 +42,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Stripe
+# SMTP / Email (Zoho)
+SMTP_HOST = os.environ.get("SMTP_HOST")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER")
+SMTP_PASS = os.environ.get("SMTP_PASS")
+EMAIL_FROM = os.environ.get("EMAIL_FROM", SMTP_USER or "")
+
+
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
