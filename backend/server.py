@@ -553,7 +553,8 @@ async def send_client_job_received_email(job: Job, client_email: Optional[str]):
 async def send_client_quote_ready_email(job: Job, client_email: Optional[str]):
     if not client_email:
         return
-    status_url = f"https://probridge.space/jobs/{job.id}/status?token={job.client_view_token}"
+    frontend_base = os.environ.get("FRONTEND_URL", "https://probridge.space").rstrip("/")
+    status_url = f"{frontend_base}/jobs/{job.id}/status?token={job.client_view_token}"
     subject = "Your ProBridge quote is ready"
     body = (
         f"Hi {job.id[:8]},\n\n"
