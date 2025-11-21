@@ -2139,12 +2139,6 @@ function ReferralPage() {
 }
 
 // ------------------------
-// Referral page
-// ------------------------
-
-function ReferralPage() {
-
-// ------------------------
 // App routes
 // ------------------------
 
