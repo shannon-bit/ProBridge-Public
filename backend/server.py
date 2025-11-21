@@ -33,7 +33,8 @@ APP_PUBLIC_NAME = "The Bridge — Local Services"
 APP_INTERNAL_NAME = "bridge_local_platform"
 
 # Auth / JWT
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "CHANGE_ME_DEV_SECRET")
+# JWT_SECRET_KEY must be provided via environment in production
+SECRET_KEY = os.environ["JWT_SECRET_KEY"]
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("JWT_EXPIRE_MINUTES", "60"))
 
