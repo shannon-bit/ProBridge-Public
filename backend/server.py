@@ -864,47 +864,68 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
     success_url = f"{domain}/jobs/{job_id}/status?token={token}"
     cancel_url = success_url
 
-    # Create Stripe Checkout session
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="payment",
-        line_items=[
-            {
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {"name": job.title or "Service job"},
-                    "unit_amount": quote["total_price_cents"],
-                },
-                "quantity": 1,
-            }
-        ],
-        metadata={"job_id": job_id, "quote_id": quote["id"]},
-        success_url=success_url,
-        cancel_url=cancel_url,
-    )
+    checkout_url: Optional[str] = None
 
-    payment_doc = {
-        "id": str(uuid.uuid4()),
-        "job_id": job_id,
-        "quote_id": quote["id"],
-        "stripe_payment_intent_id": session.get("payment_intent"),
-        "stripe_checkout_session_id": session["id"],
-        "status": "pending",
-        "amount_cents": quote["total_price_cents"],
-        "currency": "usd",
-        "created_at": datetime.now(timezone.utc),
-        "paid_at": None,
-        "failure_reason": None,
-    }
-    await db.payments.insert_one(payment_doc)
+    if PAYMENT_MODE == "stripe":
+        # Create Stripe Checkout session
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="payment",
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": job.title or "Service job"},
+                        "unit_amount": quote["total_price_cents"],
+                    },
+                    "quantity": 1,
+                }
+            ],
+            metadata={"job_id": job_id, "quote_id": quote["id"]},
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
 
-    if cfg.require_payment_before_confirm:
-        new_status: JobStatus = "awaiting_payment"
+        payment_doc = {
+            "id": str(uuid.uuid4()),
+            "job_id": job_id,
+            "quote_id": quote["id"],
+            "stripe_payment_intent_id": session.get("payment_intent"),
+            "stripe_checkout_session_id": session["id"],
+            "status": "pending",
+            "amount_cents": quote["total_price_cents"],
+            "currency": "usd",
+            "created_at": datetime.now(timezone.utc),
+            "paid_at": None,
+            "failure_reason": None,
+            "method": "stripe",
+        }
+        await db.payments.insert_one(payment_doc)
+        checkout_url = session.get("url")
+
+        new_status: JobStatus
+        if cfg.require_payment_before_confirm:
+            new_status = "awaiting_payment"
+        else:
+            new_status = "confirmed"
     else:
-        new_status = "confirmed"
-    await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
+        # Offline / manual payment mode
+        payment_doc = {
+            "id": str(uuid.uuid4()),
+            "job_id": job_id,
+            "quote_id": quote["id"],
+            "status": "pending",
+            "amount_cents": quote["total_price_cents"],
+            "currency": "usd",
+            "created_at": datetime.now(timezone.utc),
+            "paid_at": None,
+            "failure_reason": None,
+            "method": "offline",
+        }
+        await db.payments.insert_one(payment_doc)
+        new_status = "awaiting_payment"
 
-    checkout_url = session.get("url")
+    await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
 
     return ApproveQuoteResponse(job_id=job_id, quote_id=quote["id"], checkout_url=checkout_url, status=new_status)
 
