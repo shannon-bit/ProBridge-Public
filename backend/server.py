@@ -623,6 +623,9 @@ async def create_job(body: JobCreateRequest):
 
     job_id = str(uuid.uuid4())
     client_view_token = str(uuid.uuid4())
+    # Compute simple pricing suggestion (estimator v1)
+    pricing_suggestion = await get_pricing_suggestion(body.city_slug, body.service_category_slug, body.description)
+
     job_doc = {
         "id": job_id,
         "client_id": client_user["id"],
@@ -643,6 +646,7 @@ async def create_job(body: JobCreateRequest):
         "origin_channel": "web",
         "is_test": body.is_test,
         "client_view_token": client_view_token,
+        "pricing_suggestion": pricing_suggestion,
     }
     await db.jobs.insert_one(job_doc)
     await create_job_event(job_id, "job_created", "client", client_user["id"], {})
