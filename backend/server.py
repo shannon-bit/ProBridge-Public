@@ -613,7 +613,12 @@ async def on_job_created_handler(job: Job) -> None:
 
 
 async def on_quote_sent_handler(job: Job) -> None:
+    # In-app notification
     await notify_client(job.id, "client_quote_ready", {"job_id": job.id})
+
+    # Email client that quote is ready (best-effort)
+    client = await db.users.find_one({"id": job.client_id})
+    await send_client_quote_ready_email(job, client.get("email") if client else None)
 
 
 async def on_payment_succeeded_handler(job: Job, payment: Dict[str, Any]) -> None:
