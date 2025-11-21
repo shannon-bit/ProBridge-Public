@@ -138,6 +138,30 @@
   current_focus:
     - "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
   stuck_tasks: []
+# Update for full 3-role frontend testing
+## frontend:
+  - task: "Client, Contractor, Operator portals end-to-end on local-bridge.emergent.host"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User requested testing of all three roles (client, contractor, operator) on deployed Emergent URL. Run UI automation against local-bridge.emergent.host."
+## test_plan:
+  current_focus:
+    - "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
+    - "Client, Contractor, Operator portals end-to-end on local-bridge.emergent.host"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+## agent_communication:
+  - agent: "main"
+    message: "Please run frontend UI tests on https://local-bridge.emergent.host to verify client intake/status, contractor signup/login/offers/jobs, and operator login/jobs/quote creation flows all function without critical errors."
+
   test_all: false
   test_priority: "high_first"
 ## agent_communication:
