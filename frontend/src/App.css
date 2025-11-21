@@ -30,6 +30,8 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #6b7280;
+}
+
 .app-header-nav {
     display: flex;
     gap: 0.5rem;
