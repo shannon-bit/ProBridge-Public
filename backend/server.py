@@ -260,6 +260,22 @@ async def ensure_seed_data() -> None:
             c["id"] = str(uuid.uuid4())
             c["base_pricing_rule_id"] = None
 
+    # Seed a default operator user if none exists (for initial launch/testing)
+    if await db.users.count_documents({"role": "operator"}) == 0:
+        now = datetime.now(timezone.utc)
+        operator_user = {
+            "id": str(uuid.uuid4()),
+            "name": "ABQ Operator",
+            "email": "operator@probridge.space",
+            "phone": None,
+            "role": "operator",
+            "password_hash": get_password_hash("probridge-operator-123"),
+            "created_at": now,
+            "last_login_at": None,
+        }
+        await db.users.insert_one(operator_user)
+
+
         await db.service_categories.insert_many(cats)
 
 
