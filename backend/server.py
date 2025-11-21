@@ -1218,6 +1218,37 @@ async def create_or_update_quote(
 
     total = 0
     items_docs = []
+
+
+@api_router.post("/operator/jobs/{job_id}/mark-paid")
+async def operator_mark_job_paid(job_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
+    _ = current_user
+    job_doc = await db.jobs.find_one({"id": job_id})
+    if not job_doc:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    payment = await db.payments.find_one({"job_id": job_id}, sort=[("created_at", -1)])
+    if not payment:
+        raise HTTPException(status_code=400, detail="No payment record found")
+
+    if payment.get("status") == "succeeded":
+        raise HTTPException(status_code=400, detail="Payment already marked as succeeded")
+
+    now = datetime.now(timezone.utc)
+    await db.payments.update_one(
+        {"id": payment["id"]},
+        {"$set": {"status": "succeeded", "paid_at": now}},
+    )
+
+    await db.jobs.update_one(
+        {"id": job_id},
+        {"$set": {"status": "confirmed", "updated_at": now}},
+    )
+
+    await on_payment_succeeded_handler(Job(**job_doc), payment)
+
+    return {"job_id": job_id, "payment_id": payment["id"], "status": "succeeded"}
+
     for li in body.line_items:
         total_item = li.quantity * li.unit_price_cents
         total += total_item
