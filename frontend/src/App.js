@@ -159,14 +159,6 @@ function ClientHomePage() {
           <div className="app-header-title">Request a service with ProBridge</div>
           <div className="app-tagline">Tell us about your project. We’re here to help!</div>
         </div>
-        <nav className="app-header-nav" aria-label="ProBridge portals">
-          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
-            Operator
-          </a>
-          <a href="/contractor" className="app-header-link" data-testid="nav-contractor-portal">
-            Contractors
-          </a>
-        </nav>
       </header>
 
       <main className="app-main">
