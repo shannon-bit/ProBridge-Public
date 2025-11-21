@@ -827,7 +827,7 @@ async def contractor_signup(body: ContractorSignupRequest):
         "bio": body.bio or "",
         "avg_rating": 0.0,
         "completed_jobs_count": 0,
-        "status": "pending_review",
+        "status": "active",
         "public_name": body.name,
         "legal_name": None,
         "payout_preference": "manual",
