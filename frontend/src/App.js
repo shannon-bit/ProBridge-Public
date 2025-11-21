@@ -417,6 +417,21 @@ function ClientHomePage() {
           </div>
         </section>
       </main>
+
+      {/* Bottom portal & referral strip */}
+      <footer className="app-footer-portals" aria-label="ProBridge portals">
+        <div className="app-footer-portals-inner">
+          <a href="/operator/login" className="app-header-link" data-testid="nav-operator-login">
+            Operator
+          </a>
+          <a href="/contractor" className="app-header-link" data-testid="nav-contractor-portal">
+            Contractors
+          </a>
+          <a href="/referral" className="app-header-link" data-testid="nav-referral-link">
+            Referral
+          </a>
+        </div>
+      </footer>
       <Toaster />
     </div>
   );
