@@ -20,7 +20,7 @@ MONGO_URL = os.environ['MONGO_URL']
 DB_NAME = os.environ['DB_NAME']
 
 # Backend URL from frontend/.env
-BASE_URL = "https://contractor-bridge.preview.emergentagent.com/api"
+BASE_URL = "https://probridge-app.preview.emergentagent.com/api"
 
 class ProBridgeTestClient:
     def __init__(self):
