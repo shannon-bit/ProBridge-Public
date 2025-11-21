@@ -184,6 +184,53 @@ async def get_app_config() -> AppConfig:
 # Seed data helpers
 # -------------------------------------------------
 
+PRICING_CONFIG_DIR = ROOT_DIR / "config" / "pricing"
+QUOTES_CONFIG_DIR = ROOT_DIR / "config" / "quotes"
+
+
+def load_json(path: Path) -> Optional[Dict[str, Any]]:
+    try:
+        if not path.exists():
+            return None
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+async def get_pricing_suggestion(city_slug: str, service_category_slug: str, description: str) -> Optional[PricingSuggestion]:
+    """Simple estimator v1 based on config/quotes/*.json and config/pricing/*.json.
+
+    For now we use only base_price and platform_fee_pct from pricing config.
+    """
+    pricing_path = PRICING_CONFIG_DIR / f"{city_slug}.json"
+    pricing_cfg = load_json(pricing_path)
+    if not pricing_cfg:
+        return None
+
+    rules = pricing_cfg.get("rules", [])
+    rule = next((r for r in rules if r.get("slug") == service_category_slug), None)
+    if not rule:
+        return None
+
+    base_price = int(rule.get("base_price", 0))
+    if base_price <= 0:
+        return None
+
+    fee_pct = float(rule.get("platform_fee_pct", 25.0))
+    total_cents = base_price * 100
+    platform_cents = int(total_cents * fee_pct / 100.0)
+    contractor_cents = total_cents - platform_cents
+
+    return PricingSuggestion(
+        suggested_total_cents=total_cents,
+        platform_cut_cents=platform_cents,
+        contractor_cut_cents=contractor_cents,
+        source=f"pricing:{city_slug}:{service_category_slug}"
+    ).model_dump()
+
+
+
 
 async def ensure_seed_data() -> None:
     # Cities
