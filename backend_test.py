@@ -54,6 +54,40 @@ class ProBridgeTestClient:
             return {"success": False, "error": f"JSON decode error: {str(e)}"}
         except Exception as e:
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
+    
+    def test_endpoint_form(self, method: str, endpoint: str, data: Optional[Dict] = None, 
+                          headers: Optional[Dict] = None, params: Optional[Dict] = None) -> Dict[str, Any]:
+        """Test an API endpoint with form data and return structured result"""
+        url = f"{BASE_URL}{endpoint}"
+        
+        try:
+            if headers:
+                test_headers = {**headers}
+            else:
+                test_headers = {}
+            
+            # Remove Content-Type for form data
+            if 'Content-Type' in test_headers:
+                del test_headers['Content-Type']
+                
+            if method.upper() == 'POST':
+                response = self.session.post(url, data=data, params=params, headers=test_headers, timeout=30)
+            else:
+                return {"success": False, "error": f"Form method only supports POST"}
+                
+            return {
+                "success": response.status_code < 400,
+                "status_code": response.status_code,
+                "data": response.json() if response.content else {},
+                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:200]}"
+            }
+            
+        except requests.exceptions.RequestException as e:
+            return {"success": False, "error": f"Request failed: {str(e)}"}
+        except json.JSONDecodeError as e:
+            return {"success": False, "error": f"JSON decode error: {str(e)}"}
+        except Exception as e:
+            return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 def test_money_loop():
     """Test the complete ProBridge money loop"""
