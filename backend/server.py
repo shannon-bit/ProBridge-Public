@@ -146,6 +146,8 @@ async def send_smtp_email(
         msg["Subject"] = subject
         msg["From"] = formataddr((sender_name, EMAIL_FROM))
         msg["To"] = to_email
+        if EMAIL_REPLY_TO:
+            msg["Reply-To"] = EMAIL_REPLY_TO
 
         subtype = "html" if is_html else "plain"
         part = MIMEText(body, subtype, "utf-8")
