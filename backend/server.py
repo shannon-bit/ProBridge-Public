@@ -198,7 +198,7 @@ def load_json(path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-async def get_pricing_suggestion(city_slug: str, service_category_slug: str, description: str) -> Optional[PricingSuggestion]:
+async def get_pricing_suggestion(city_slug: str, service_category_slug: str, description: str) -> Optional[Dict[str, Any]]:
     """Simple estimator v1 based on config/quotes/*.json and config/pricing/*.json.
 
     For now we use only base_price and platform_fee_pct from pricing config.
