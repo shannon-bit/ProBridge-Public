@@ -351,7 +351,11 @@ def test_money_loop():
         if final_status_result["success"]:
             print("✅ Final job status check successful")
             print(f"   Final status: {final_status_result['data']['status']}")
-            print(f"   Quote total: ${final_status_result['data'].get('quote_total_cents', 0) / 100:.2f}")
+            quote_total = final_status_result['data'].get('quote_total_cents')
+            if quote_total is not None:
+                print(f"   Quote total: ${quote_total / 100:.2f}")
+            else:
+                print("   Quote total: Not available")
         else:
             print(f"❌ Final job status check failed: {final_status_result['error']}")
     
