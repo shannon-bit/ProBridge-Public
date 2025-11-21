@@ -101,3 +101,42 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+## user_problem_statement: "Ensure ProBridge backend flows (job creation, estimator/quote, contractor acceptance) work correctly on deployed instance while DNS for custom domain propagates."
+## backend:
+  - task: "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Requesting end-to-end backend testing against deployed Emergent URL (local-bridge.emergent.host) while DNS for probridge.space propagates."
+## frontend:
+  - task: "Frontend flows for client, contractor, operator portals"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend-focused testing for now; frontend auto-testing can be added later if user requests."
+## metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+## test_plan:
+  current_focus:
+    - "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+## agent_communication:
+  - agent: "main"
+    message: "Please test the deployed backend at REACT_APP_BACKEND_URL (local-bridge.emergent.host) for end-to-end money loop flows: client job creation, operator quote creation via estimator, Stripe session creation (can be mocked if keys missing), contractor job acceptance, and job status transitions."
