@@ -53,6 +53,9 @@ EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", "support@probridge.space")
 
 
 # Stripe secrets must be provided via environment in production
+PAYMENT_MODE = os.environ.get("PAYMENT_MODE", "offline")  # "stripe" or "offline"
+
+
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 
