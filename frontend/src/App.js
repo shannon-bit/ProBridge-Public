@@ -1758,36 +1758,6 @@ function ContractorDashboard() {
               <CardHeader>
                 <CardTitle className="text-base">Available Jobs</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">Browse open requests in your area.</p>
-              </CardHeader>
-              <CardContent>
-                {offers.length === 0 ? (
-                  <p className="text-sm text-slate-500" data-testid="contractor-offers-empty">
-                    No matching offers right now.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {offers.map((j) => (
-                      <div
-                        key={j.id}
-                        className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
-                        data-testid={`contractor-offer-${j.id}`}
-                      >
-                        <div>
-                          <div className="font-medium">{j.title || "Untitled"}</div>
-                          <div className="text-slate-500">{j.description?.slice(0, 80)}</div>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => acceptJob(j.id)}
-                          disabled={acceptingId === j.id}
-                          data-testid={`contractor-accept-${j.id}`}
-                        >
-                          {acceptingId === j.id ? "Accepting…" : "Accept job"}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </CardContent>
             </Card>
           )}
