@@ -212,6 +212,14 @@ async def ensure_seed_data() -> None:
         for c in cats:
             c["id"] = str(uuid.uuid4())
             c["base_pricing_rule_id"] = None
+class PricingSuggestion(BaseModel):
+    suggested_total_cents: int
+    platform_cut_cents: int
+    contractor_cut_cents: int
+    source: str
+
+
+
         await db.service_categories.insert_many(cats)
 
 
