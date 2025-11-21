@@ -162,21 +162,30 @@ function ClientHomePage() {
       </header>
 
       <main className="app-main">
-        <section>
-          <div className="app-hero-title" data-testid="hero-main-title">
-            ProBridge connects you with trusted local pros.
-          </div>
-          <p className="app-hero-subtitle" data-testid="hero-subtitle">
-            Share a few details and we’ll route your request to a vetted contractor.
-          </p>
-          <div className="app-hero-chip-row">
-            <span className="app-hero-chip" data-testid="chip-city">Starting in Albuquerque</span>
-            <span className="app-hero-chip" data-testid="chip-handyman">Home services first</span>
-            <span className="app-hero-chip" data-testid="chip-operator">Operator-managed quotes & routing</span>
-          </div>
+        <section className="app-hero-grid">
+          <div>
+            <div className="app-hero-title" data-testid="hero-main-title">
+              ProBridge connects you with trusted local pros.
+            </div>
+            <p className="app-hero-subtitle" data-testid="hero-subtitle">
+              Share a few details and we’ll route your request to a vetted contractor.
+            </p>
+            <div className="app-hero-chip-row">
+              <span className="app-hero-chip" data-testid="chip-city">Starting in Albuquerque</span>
+              <span className="app-hero-chip" data-testid="chip-handyman">Home services first</span>
+              <span className="app-hero-chip" data-testid="chip-operator">Operator-managed quotes & routing</span>
+            </div>
 
-          <div className="app-secondary-surface" data-testid="info-sandbox">
-            <strong>Test request.</strong> You can mark this as a test at the bottom of the form if you’re just trying things out.
+            <div className="app-secondary-surface" data-testid="info-sandbox">
+              <strong>Test request.</strong> You can mark this as a test at the bottom of the form if you’re just trying things out.
+            </div>
+          </div>
+          <div className="app-hero-image-wrapper">
+            <img
+              src={HERO_IMAGE_URL}
+              alt="ProBridge ABQ – one request, one clear price"
+              className="app-hero-image"
+            />
           </div>
         </section>
 
