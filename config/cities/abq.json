@@ -1,0 +1,15 @@
+{
+  "city_slug": "abq",
+  "display_name": "Albuquerque",
+  "primary_timezone": "America/Denver",
+  "service_radius_km": 30,
+  "default_platform_fee_pct": 25.0,
+  "categories": [
+    { "slug": "handyman", "display_name": "Handyman" },
+    { "slug": "cleaning", "display_name": "Cleaning" },
+    { "slug": "moving", "display_name": "Moving" },
+    { "slug": "furniture-assembly", "display_name": "Furniture Assembly" },
+    { "slug": "home-repair", "display_name": "Home Repair" }
+  ],
+  "notes": "City-level configuration for ABQ. Backend currently seeds this city in code; this file is the canonical reference for future config-driven behavior."
+}
