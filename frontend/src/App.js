@@ -2138,33 +2138,11 @@ function ReferralPage() {
   );
 }
 
-                      <div
-                        key={j.id}
-                        className="flex items-center justify-between rounded border border-slate-200 p-2 text-xs"
-                        data-testid={`contractor-offer-${j.id}`}
-                      >
-                        <div>
-                          <div className="font-medium">{j.title || "Untitled"}</div>
-                          <div className="text-slate-500">{j.description?.slice(0, 80)}</div>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => acceptJob(j.id)}
-                          disabled={acceptingId === j.id}
-                          data-testid={`contractor-accept-${j.id}`}
-                        >
-                          {acceptingId === j.id ? "Accepting…" : "Accept job"}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+// ------------------------
+// Referral page
+// ------------------------
 
-          {tab === "jobs" && (
-            <Card data-testid="contractor-jobs-card">
+function ReferralPage() {
               <CardHeader>
                 <CardTitle className="text-base">Your Jobs</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">
