@@ -1,0 +1,27 @@
+{
+  "city": "abq",
+  "category_slug": "cleaning",
+  "mode": "quote",
+  "style": "flat_by_home_size",
+  "currency": "USD",
+  "base_price": 180,
+  "platform_fee_pct": 25.0,
+  "description": "Home or small office cleaning priced by home size/tier, with optional deep-clean uplift.",
+  "questions": [
+    "How many bedrooms?",
+    "How many bathrooms?",
+    "Approximate square footage?",
+    "Is this a standard clean or deep clean?"
+  ],
+  "tiers": [
+    { "code": "small",  "label": "Studio or 1 bed / 1 bath",          "price": 140 },
+    { "code": "medium", "label": "Up to 3 bed / 2 bath",             "price": 180 },
+    { "code": "large",  "label": "Larger homes or deep cleaning",    "price": 240 }
+  ],
+  "deep_clean_uplift_pct": 20,
+  "operator_guidance": [
+    "Select the closest tier based on bedrooms/bathrooms and square footage; round up for cluttered homes.",
+    "Apply the deep_clean_uplift_pct if the client requests a deep clean or the home is heavily soiled.",
+    "Present a single flat price to the client that covers labor, cleaning products, and basic equipment."
+  ]
+}
