@@ -52,8 +52,9 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM", SMTP_USER or "")
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", "support@probridge.space")
 
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
-STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
+# Stripe secrets must be provided via environment in production
+stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 
 # -------------------------------------------------
 # Helpers & Enums
