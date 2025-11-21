@@ -1,0 +1,29 @@
+{
+  "city": "abq",
+  "category_slug": "home-repair",
+  "mode": "quote",
+  "style": "diagnostic_plus_estimate",
+  "currency": "USD",
+  "base_price": 220,
+  "platform_fee_pct": 25.0,
+  "description": "Home repair jobs start with a diagnostic visit fee; larger repairs may require a follow-up estimate.",
+  "questions": [
+    "What is the main issue (e.g., leak, electrical, structural, cosmetic)?",
+    "How long has this issue been present?",
+    "Have any previous repairs been attempted?",
+    "Are there photos or videos of the issue you can share?"
+  ],
+  "diagnostic": {
+    "visit_fee": 220,
+    "includes": [
+      "On-site assessment of the issue",
+      "Basic troubleshooting and minor fixes if time allows",
+      "Recommendation and estimate if a larger repair is needed"
+    ]
+  },
+  "operator_guidance": [
+    "Use the diagnostic visit_fee as the initial quote when the scope is unclear or could be large.",
+    "If the description is clearly a small fix, you may quote a simple flat repair price instead of diagnostic-only.",
+    "For major repairs, explain that the first visit is for diagnosis and a follow-up estimate will be provided after inspection."
+  ]
+}
