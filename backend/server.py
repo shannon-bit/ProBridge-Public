@@ -1287,9 +1287,9 @@ async def operator_mark_job_paid(job_id: str, current_user: UserInDB = Depends(r
 
 @api_router.post("/operator/jobs/{job_id}/mark-payment-received")
 async def operator_mark_payment_received(job_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
-    """Alias endpoint for marking payment received (offline or Stripe).
+    """Alias endpoint for marking offline payment as received.
 
-    Keeps compatibility with specs expecting /mark-payment-received while reusing core logic.
+    For now this simply forwards to the existing mark-paid logic.
     """
     return await operator_mark_job_paid(job_id, current_user)
 
