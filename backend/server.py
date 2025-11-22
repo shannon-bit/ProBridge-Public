@@ -1256,7 +1256,7 @@ class CreateQuoteRequest(BaseModel):
     line_items: List[LineItem]
 
 
-@api_router.post("/operator/jobs/{job_id}/quotes")
+@api_router.post("/operator/jobs/{job_id}/quotes", response_model=QuoteOut)
 async def create_or_update_quote(
     job_id: str,
     body: CreateQuoteRequest,
