@@ -436,10 +436,17 @@ def test_operator_quote_creation():
             print(f"   ❌ Failed to create test job: {job_create_result['error']}")
             return test_results
     else:
+        # Test multiple eligible jobs to confirm the issue is consistent
+        print(f"   Testing multiple jobs to confirm consistency:")
+        for i, job in enumerate(eligible_jobs[:3]):  # Test up to 3 jobs
+            job_id = job["id"]
+            status = job.get("status")
+            print(f"   Job {i+1}: {job_id} (status: {status})")
+        
         # Use the first eligible job
         target_job = eligible_jobs[0]
         target_job_id = target_job["id"]
-        print(f"   Using existing job: {target_job_id} (status: {target_job.get('status')})")
+        print(f"   Using job: {target_job_id} (status: {target_job.get('status')})")
     
     # Step 3: Create quote for the target job
     print(f"\n💰 Step 3: Create Quote for Job {target_job_id}")
