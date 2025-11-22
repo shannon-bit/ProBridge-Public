@@ -691,9 +691,9 @@ function JobStatusPage() {
                           <span className="text-[11px] text-slate-500">Optional: scan this QR for your notes app or bank.</span>
                           <div className="bg-white p-2 rounded border border-slate-200" data-testid="offline-payment-qr">
                             <QRCodeCanvas
-                              value={`Pay via Zelle\nTo: 505-645-4772\nAmount: $${(job.quote_total_cents / 100).toFixed(
-                                2,
-                              )}\nMemo: Job ID ${job.id}`}
+                              value={`Pay via Zelle\nTo: ${process.env.REACT_APP_ZELLE_PHONE || "505-645-4772"}\nAmount: $${(
+                                job.quote_total_cents / 100
+                              ).toFixed(2)}\nMemo: Job ID ${job.id}`}
                               size={96}
                               includeMargin={false}
                             />
