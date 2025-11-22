@@ -1306,7 +1306,9 @@ async def create_or_update_quote(
     }
     await db.quotes.insert_one(quote_doc)
     await create_job_event(job_id, "quote_created", "operator", current_user.id, {"quote_id": quote_id})
-    return quote_doc
+    # Remove Mongo's internal _id before returning
+    quote_doc.pop("_id", None)
+    return QuoteOut(**quote_doc)
 
 
 @api_router.post("/operator/jobs/{job_id}/mark-paid")
