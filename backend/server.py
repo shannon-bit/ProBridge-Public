@@ -912,6 +912,7 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
             new_status = "confirmed"
     else:
         # Offline / manual payment mode
+        payment_mode = "offline"
         payment_doc = {
             "id": str(uuid.uuid4()),
             "job_id": job_id,
