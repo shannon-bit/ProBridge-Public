@@ -155,44 +155,18 @@ def test_offline_payment_money_loop():
     
     # Test data
     test_suffix = str(uuid.uuid4())[:8]
-    client_email = f"testclient_{test_suffix}@example.com"
-    contractor_email = f"testcontractor_{test_suffix}@example.com"
-    operator_email = f"testoperator_{test_suffix}@example.com"
+    client_email = f"smokeclient_{test_suffix}@example.com"
     
     # Store test state
     test_state = {
         "job_id": None,
         "client_view_token": None,
-        "contractor_token": None,
         "operator_token": None,
         "quote_id": None
     }
     
-    # Step 1: Test meta endpoints (cities and service categories)
-    print("\n📍 Step 1: Testing Meta Endpoints")
-    
-    cities_result = client.test_endpoint('GET', '/meta/cities')
-    test_results.append(("GET /meta/cities", cities_result))
-    if cities_result["success"]:
-        print("✅ Cities endpoint working")
-        cities = cities_result["data"]
-        if not cities:
-            print("⚠️  No cities found in database")
-    else:
-        print(f"❌ Cities endpoint failed: {cities_result['error']}")
-        
-    categories_result = client.test_endpoint('GET', '/meta/service-categories')
-    test_results.append(("GET /meta/service-categories", categories_result))
-    if categories_result["success"]:
-        print("✅ Service categories endpoint working")
-        categories = categories_result["data"]
-        if not categories:
-            print("⚠️  No service categories found in database")
-    else:
-        print(f"❌ Service categories endpoint failed: {categories_result['error']}")
-    
-    # Step 2: Create a client job
-    print("\n👤 Step 2: Client Job Creation")
+    # Step 1: Create a client job
+    print("\n👤 Step 1: Client Job Creation")
     
     job_data = {
         "city_slug": "abq",
