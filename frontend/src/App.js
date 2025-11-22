@@ -8,6 +8,7 @@ import {
   useSearchParams,
   useParams,
 } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
 import axios from "axios";
 import "@/App.css";
 import "@/index.css";
