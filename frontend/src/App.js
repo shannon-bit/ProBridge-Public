@@ -671,7 +671,7 @@ function JobStatusPage() {
                   )}
 
                   {job.status === "awaiting_payment" && (
-                    <div className="flex items-center gap-2 mt-2" data-testid="job-awaiting-payment-copy">
+                    <div className="mt-2 space-y-2" data-testid="job-awaiting-payment-copy">
                       <div className="text-xs text-slate-600 space-y-1">
                         <p>
                           Your quote is approved. To confirm your booking, please send payment via Zelle using the details
