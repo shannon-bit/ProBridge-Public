@@ -275,8 +275,12 @@ def test_offline_payment_money_loop():
     # Step 6: Operator marks payment as received
     print("\n💳 Step 6: Operator Marks Payment Received")
     
-    if test_state["job_id"] and test_state["operator_token"]:
-        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+    if test_state["job_id"]:
+        if test_state.get("operator_token"):
+            auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        else:
+            auth_headers = {}
+            
         mark_paid_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/mark-payment-received',
                                               headers=auth_headers)
         test_results.append(("POST /operator/jobs/{job_id}/mark-payment-received", mark_paid_result))
@@ -286,6 +290,7 @@ def test_offline_payment_money_loop():
             print(f"   Payment status: {mark_paid_result['data'].get('status', 'N/A')}")
         else:
             print(f"❌ Payment marking failed: {mark_paid_result['error']}")
+            print("   This is expected without operator authentication")
     
     # Step 7: Final status check
     print("\n🔍 Step 7: Final Job Status Check")
