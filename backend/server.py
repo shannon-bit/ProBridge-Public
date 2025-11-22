@@ -1283,6 +1283,14 @@ async def operator_mark_job_paid(job_id: str, current_user: UserInDB = Depends(r
         {"$set": {"status": "succeeded", "paid_at": now}},
     )
 
+    await db.jobs.update_one(
+        {"id": job_id},
+        {"$set": {"status": "confirmed", "updated_at": now}},
+    )
+
+    await on_payment_succeeded_handler(Job(**job_doc), payment)
+
+    return {"job_id": job_id, "payment_id": payment["id"], "status": "succeeded"}
 
 
 @api_router.post("/operator/jobs/{job_id}/mark-payment-received")
@@ -1292,15 +1300,6 @@ async def operator_mark_payment_received(job_id: str, current_user: UserInDB = D
     For now this simply forwards to the existing mark-paid logic.
     """
     return await operator_mark_job_paid(job_id, current_user)
-
-    await db.jobs.update_one(
-        {"id": job_id},
-        {"$set": {"status": "confirmed", "updated_at": now}},
-    )
-
-    await on_payment_succeeded_handler(Job(**job_doc), payment)
-
-    return {"job_id": job_id, "payment_id": payment["id"], "status": "succeeded"}
 
 
 @api_router.post("/operator/jobs/{job_id}/send-quote")
