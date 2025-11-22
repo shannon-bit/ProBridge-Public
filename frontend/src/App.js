@@ -703,10 +703,10 @@ function JobStatusPage() {
                         disabled={approving}
                         data-testid="approve-and-pay-button"
                       >
-                        {approving ? "Opening checkout…" : "Approve quote"}
+                        {approving ? "Saving…" : "Approve quote"}
                       </Button>
                       <p className="mt-1 text-[11px] text-slate-500" data-testid="approve-quote-tooltip">
-                        Approve to proceed to payment. We’ll hold the payment securely until the job is complete.
+                        Approve to see payment instructions. You’ll pay securely via your own banking app.
                       </p>
                     </div>
                   )}
