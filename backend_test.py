@@ -348,8 +348,21 @@ def print_test_summary(test_results):
 
 if __name__ == "__main__":
     try:
-        test_results = test_money_loop()
-        print_test_summary(test_results)
+        print("🚀 ProBridge Backend Smoke Test")
+        print(f"Testing against: {BASE_URL}")
+        print("=" * 60)
+        
+        # Test 1: Basic startup sanity
+        startup_results = test_basic_startup_sanity()
+        
+        # Test 2: Offline payment money loop
+        money_loop_results = test_offline_payment_money_loop()
+        
+        # Combine results
+        all_results = startup_results + money_loop_results
+        
+        print_test_summary(all_results)
+        
     except Exception as e:
         print(f"\n💥 Test execution failed: {str(e)}")
         import traceback
