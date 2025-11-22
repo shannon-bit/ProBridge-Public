@@ -1283,6 +1283,16 @@ async def operator_mark_job_paid(job_id: str, current_user: UserInDB = Depends(r
         {"$set": {"status": "succeeded", "paid_at": now}},
     )
 
+
+
+@api_router.post("/operator/jobs/{job_id}/mark-payment-received")
+async def operator_mark_payment_received(job_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
+    """Alias endpoint for marking payment received (offline or Stripe).
+
+    Keeps compatibility with specs expecting /mark-payment-received while reusing core logic.
+    """
+    return await operator_mark_job_paid(job_id, current_user)
+
     await db.jobs.update_one(
         {"id": job_id},
         {"$set": {"status": "confirmed", "updated_at": now}},
