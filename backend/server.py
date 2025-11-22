@@ -1245,8 +1245,8 @@ class QuoteOut(BaseModel):
     version: int
     status: str
     total_price_cents: int
-    created_at: datetime
-    approved_at: Optional[datetime] = None
+    created_at: str
+    approved_at: Optional[str] = None
     rejected_reason: Optional[str] = None
 
     model_config = ConfigDict(extra="ignore")
