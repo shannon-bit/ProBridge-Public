@@ -12,9 +12,9 @@ import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-# Use local backend for smoke testing (since we're testing the running instance)
-BASE_URL = "http://localhost:8001/api"
-print(f"Using local backend URL: {BASE_URL}")
+# Use production backend URL from frontend .env
+BASE_URL = "https://probridge.space/api"
+print(f"Using production backend URL: {BASE_URL}")
 
 class ProBridgeTestClient:
     def __init__(self):
