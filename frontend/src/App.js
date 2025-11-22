@@ -659,6 +659,17 @@ function JobStatusPage() {
                       <p className="text-xs text-slate-600 mb-1">Your pro has sent a quote.</p>
                       <Button
                         onClick={handleApproveAndPay}
+                        disabled={approving}
+                        data-testid="approve-and-pay-button"
+                      >
+                        {approving ? "Saving…" : "Approve quote"}
+                      </Button>
+                      <p className="mt-1 text-[11px] text-slate-500" data-testid="approve-quote-tooltip">
+                        Approve to see payment instructions. You’ll pay securely via your own banking app.
+                      </p>
+                    </div>
+                  )}
+
                   {job.status === "awaiting_payment" && (
                     <div className="flex items-center gap-2 mt-2" data-testid="job-awaiting-payment-copy">
                       <div className="text-xs text-slate-600 space-y-1">
