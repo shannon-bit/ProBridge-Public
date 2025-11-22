@@ -639,6 +639,13 @@ function JobStatusPage() {
                       <p className="text-xs text-slate-600 mb-1">Your pro has sent a quote.</p>
                       <Button
                         onClick={handleApproveAndPay}
+                  {job.status === "awaiting_payment" && (
+                    <p className="text-xs text-slate-600" data-testid="job-awaiting-payment-copy">
+                      Your quote is approved. Please follow the payment instructions you received from the operator. We’ll
+                      confirm and schedule your pro once payment is received.
+                    </p>
+                  )}
+
                         disabled={approving}
                         data-testid="approve-and-pay-button"
                       >
