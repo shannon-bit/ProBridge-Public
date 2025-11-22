@@ -1,17 +1,32 @@
 #!/usr/bin/env python3
 """
-ProBridge Backend Testing - Core Money Loop
-Tests the complete flow: client job -> operator quote -> client payment -> contractor acceptance -> completion
+ProBridge Backend Smoke Testing
+Focus on: (1) basic startup sanity, (2) offline payment money loop
+Tests: create job -> operator sends quote -> client approves -> offline payment transitions
 """
 
 import requests
 import json
 import uuid
+import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-# Backend URL for live domain testing
-BASE_URL = "https://probridge.space/api"
+# Get backend URL from environment (REACT_APP_BACKEND_URL from frontend/.env)
+def get_backend_url():
+    # Try to read from frontend/.env
+    try:
+        with open('/app/frontend/.env', 'r') as f:
+            for line in f:
+                if line.startswith('REACT_APP_BACKEND_URL='):
+                    return line.split('=', 1)[1].strip()
+    except:
+        pass
+    # Fallback
+    return "https://probridge.space/api"
+
+BASE_URL = get_backend_url()
+print(f"Using backend URL: {BASE_URL}")
 
 class ProBridgeTestClient:
     def __init__(self):
