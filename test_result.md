@@ -120,6 +120,9 @@
       - working: false
         agent: "testing"
         comment: "❌ CRITICAL ISSUE ON LIVE DOMAIN - Comprehensive testing against https://probridge.space/api reveals operator quote creation failure: POST /api/operator/jobs/{job_id}/quotes returns HTTP 500 Internal Server Error, blocking the core money loop. WORKING: ✅ Job creation (ABQ + valid service categories), ✅ Estimator (pricing_suggestion from config/pricing/abq.json), ✅ Operator login (operator@probridge.space), ✅ Contractor signup/dashboard (full functionality). BROKEN: ❌ Operator quote creation (500 error), ❌ Stripe session creation (blocked by quote failure). Root cause analysis needed for quote creation endpoint - likely database/backend logic issue on production deployment."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL BACKEND ISSUE CONFIRMED - Local smoke testing reveals MongoDB ObjectId serialization error in quote creation endpoint. WORKING: ✅ FastAPI startup sanity (imports correctly, no Stripe env required), ✅ Basic database connectivity (cities/service-categories), ✅ Job creation flow, ✅ Authentication system, ✅ Operator login (testoperator@example.com), ✅ Operator job/contractor listing endpoints. BROKEN: ❌ POST /api/operator/jobs/{job_id}/quotes returns HTTP 500 Internal Server Error with ValueError: [TypeError(\"'ObjectId' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')]. This blocks the entire money loop as quotes cannot be created. Root cause: MongoDB ObjectId serialization issue in FastAPI response encoding. The backend crashes when trying to serialize quote creation response containing MongoDB ObjectIds."
 ## frontend:
   - task: "Frontend flows for client, contractor, operator portals"
     implemented: true
