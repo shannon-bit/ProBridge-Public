@@ -64,17 +64,13 @@ class ProBridgeTestClient:
         url = f"{BASE_URL}{endpoint}"
         
         try:
+            # Create a new session for form data to avoid JSON headers
+            form_session = requests.Session()
             if headers:
-                test_headers = {**headers}
-            else:
-                test_headers = {}
-            
-            # Remove Content-Type for form data
-            if 'Content-Type' in test_headers:
-                del test_headers['Content-Type']
+                form_session.headers.update(headers)
                 
             if method.upper() == 'POST':
-                response = self.session.post(url, data=data, params=params, headers=test_headers, timeout=30)
+                response = form_session.post(url, data=data, params=params, timeout=30)
             else:
                 return {"success": False, "error": f"Form method only supports POST"}
                 
@@ -82,7 +78,7 @@ class ProBridgeTestClient:
                 "success": response.status_code < 400,
                 "status_code": response.status_code,
                 "data": response.json() if response.content else {},
-                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:200]}"
+                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:500]}"
             }
             
         except requests.exceptions.RequestException as e:
