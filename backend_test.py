@@ -193,7 +193,8 @@ def test_offline_payment_money_loop():
         test_state["operator_token"] = operator_login_result["data"]["access_token"]
     else:
         print(f"❌ Operator login failed: {operator_login_result['error']}")
-        return test_results
+        print("   Trying to continue without operator authentication...")
+        # Continue without operator token for now
     
     # Step 3: Create and send quote
     print("\n💰 Step 3: Create Quote")
