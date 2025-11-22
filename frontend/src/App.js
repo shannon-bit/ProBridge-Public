@@ -539,8 +539,17 @@ function JobStatusPage() {
     setApproving(true);
     try {
       const res = await axios.post(`/jobs/${jobId}/approve-quote`, { token });
-      const { checkout_url: checkoutUrl } = res.data;
-      if (checkoutUrl) {
+      const { checkout_url: checkoutUrl, payment_mode } = res.data;
+
+      if (payment_mode === "offline") {
+        // In offline mode, no checkout redirect. Just reload status.
+        const statusRes = await axios.get(`/jobs/${jobId}/status`, { params: { token } });
+        setJob(statusRes.data);
+        toast({
+          title: "Quote approved",
+          description: "Please send payment using the instructions below.",
+        });
+      } else if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
         toast({
