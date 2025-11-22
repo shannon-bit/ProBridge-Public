@@ -834,6 +834,8 @@ class ApproveQuoteResponse(BaseModel):
     quote_id: str
     checkout_url: Optional[str] = None
     status: JobStatus
+    ok: bool = True
+    payment_mode: str = "stripe"
 
 
 class PaymentStatusIn(BaseModel):
