@@ -49,7 +49,7 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER")
 SMTP_PASS = os.environ.get("SMTP_PASS")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", SMTP_USER or "")
-EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", "support@probridge.space")
+EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", SMTP_USER or "")
 
 
 # Stripe secrets must be provided via environment in production
