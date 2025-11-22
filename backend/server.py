@@ -1238,6 +1238,20 @@ class LineItem(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 
+
+class QuoteOut(BaseModel):
+    id: str
+    job_id: str
+    version: int
+    status: str
+    total_price_cents: int
+    created_at: datetime
+    approved_at: Optional[datetime] = None
+    rejected_reason: Optional[str] = None
+
+    model_config = ConfigDict(extra="ignore")
+
+
 class CreateQuoteRequest(BaseModel):
     line_items: List[LineItem]
 
