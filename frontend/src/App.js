@@ -71,6 +71,8 @@ function useAuth(roleKey) {
     }
   }
 
+  return { token, saveToken };
+}
 
 // ------------------------
 // Shared footer portals
@@ -150,9 +152,6 @@ function FooterPortals() {
       )}
     </footer>
   );
-}
-
-  return { token, saveToken };
 }
 
 // ------------------------
