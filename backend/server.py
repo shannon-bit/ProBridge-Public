@@ -913,8 +913,9 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
     else:
         # Offline / manual payment mode
         payment_mode = "offline"
+        payment_id = str(uuid.uuid4())
         payment_doc = {
-            "id": str(uuid.uuid4()),
+            "id": payment_id,
             "job_id": job_id,
             "quote_id": quote["id"],
             "status": "pending",
@@ -926,6 +927,9 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
             "method": "offline",
         }
         await db.payments.insert_one(payment_doc)
+        # Record event + notify operator that offline payment is pending
+        await create_job_event(job_id, "offline_payment_pending", "client", job.client_id, {"payment_id": payment_id})
+        await notify_operator("offline_payment_pending", {"job_id": job_id, "payment_id": payment_id})
         new_status: JobStatus = "awaiting_payment"
 
     await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
