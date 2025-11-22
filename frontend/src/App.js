@@ -641,7 +641,8 @@ function JobStatusPage() {
                         onClick={handleApproveAndPay}
                   {job.status === "awaiting_payment" && (
                     <p className="text-xs text-slate-600" data-testid="job-awaiting-payment-copy">
-                      Your quote is approved. Please follow the payment instructions you received from the operator. We’ll
+                      Your quote is approved. Please follow the payment instructions we sent you (for example, pay via Zelle to
+                      the email shown in your confirmation). We’ll
                       confirm and schedule your pro once payment is received.
                     </p>
                   )}
