@@ -1294,19 +1294,20 @@ async def create_or_update_quote(
         await db.job_line_items.insert_one(doc)
 
     quote_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc)
     quote_doc = {
         "id": quote_id,
         "job_id": job_id,
         "version": version,
         "status": "draft",
         "total_price_cents": total,
-        "created_at": datetime.now(timezone.utc),
+        "created_at": now.isoformat(),
         "approved_at": None,
         "rejected_reason": None,
     }
     await db.quotes.insert_one(quote_doc)
     await create_job_event(job_id, "quote_created", "operator", current_user.id, {"quote_id": quote_id})
-    # Remove Mongo's internal _id before returning
+    # Ensure no MongoDB internal _id leaks into the response
     quote_doc.pop("_id", None)
     return QuoteOut(**quote_doc)
 
