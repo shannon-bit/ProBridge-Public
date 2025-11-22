@@ -1217,6 +1217,41 @@ async def create_or_update_quote(
     total = 0
     items_docs = []
 
+    for li in body.line_items:
+        total_item = li.quantity * li.unit_price_cents
+        total += total_item
+        items_docs.append(
+            {
+                "id": str(uuid.uuid4()),
+                "job_id": job_id,
+                "type": li.type,
+                "label": li.label,
+                "quantity": li.quantity,
+                "unit_price_cents": li.unit_price_cents,
+                "total_price_cents": total_item,
+                "metadata": li.metadata or {},
+            }
+        )
+
+    await db.job_line_items.delete_many({"job_id": job_id})
+    for doc in items_docs:
+        await db.job_line_items.insert_one(doc)
+
+    quote_id = str(uuid.uuid4())
+    quote_doc = {
+        "id": quote_id,
+        "job_id": job_id,
+        "version": version,
+        "status": "draft",
+        "total_price_cents": total,
+        "created_at": datetime.now(timezone.utc),
+        "approved_at": None,
+        "rejected_reason": None,
+    }
+    await db.quotes.insert_one(quote_doc)
+    await create_job_event(job_id, "quote_created", "operator", current_user.id, {"quote_id": quote_id})
+    return quote_doc
+
 
 @api_router.post("/operator/jobs/{job_id}/mark-paid")
 async def operator_mark_job_paid(job_id: str, current_user: UserInDB = Depends(require_role("operator", "admin"))):
