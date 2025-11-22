@@ -512,10 +512,30 @@ def test_operator_quote_creation():
         print(f"❌ Quote creation failed!")
         print(f"   Status Code: {quote_result.get('status_code', 'N/A')}")
         print(f"   Error: {quote_result.get('error', 'Unknown error')}")
+        print(f"   Raw Response: {quote_result.get('data', {}).get('raw_response', 'N/A')[:200]}")
         
-        # Check if this is the ObjectId serialization error
+        # Check if this is the ObjectId serialization error or HTTP 500
+        status_code = quote_result.get('status_code')
         error_msg = quote_result.get('error', '').lower()
-        if 'objectid' in error_msg or 'not iterable' in error_msg or 'vars()' in error_msg:
+        raw_response = quote_result.get('data', {}).get('raw_response', '').lower()
+        
+        if status_code == 500:
+            print("   🚨 CONFIRMED: HTTP 500 Internal Server Error - This is the ObjectId serialization crash!")
+            print("   🔧 The MongoDB ObjectId serialization issue has NOT been resolved")
+            
+            # Try to test with another job to confirm consistency
+            if len(eligible_jobs) > 1:
+                print(f"\n   🔄 Testing second job to confirm consistency...")
+                second_job_id = eligible_jobs[1]["id"]
+                second_quote_result = client.test_endpoint('POST', f'/operator/jobs/{second_job_id}/quotes', 
+                                                        quote_request, headers=auth_headers)
+                test_results.append((f"POST /operator/jobs/{second_job_id}/quotes (second test)", second_quote_result))
+                
+                if second_quote_result.get('status_code') == 500:
+                    print(f"   🚨 CONFIRMED: Second job also returns HTTP 500 - Issue is consistent across jobs")
+                else:
+                    print(f"   ℹ️  Second job returned different status: {second_quote_result.get('status_code')}")
+        elif 'objectid' in error_msg or 'not iterable' in error_msg or 'vars()' in error_msg:
             print("   🚨 DETECTED: This appears to be the MongoDB ObjectId serialization error!")
             print("   🔧 The ObjectId serialization crash is still present")
         else:
