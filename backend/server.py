@@ -52,12 +52,12 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM", SMTP_USER or "")
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", SMTP_USER or "")
 
 
-# Stripe secrets must be provided via environment in production
+# Stripe (optional, disabled when PAYMENT_MODE=offline or no key set)
 PAYMENT_MODE = os.environ.get("PAYMENT_MODE", "offline")  # "stripe" or "offline"
-
-
-stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
-STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
 # -------------------------------------------------
 # Helpers & Enums
