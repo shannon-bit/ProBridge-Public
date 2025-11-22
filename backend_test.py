@@ -171,12 +171,12 @@ def test_offline_payment_money_loop():
     job_data = {
         "city_slug": "abq",
         "service_category_slug": "handyman", 
-        "title": f"Test Handyman Job {test_suffix}",
-        "description": "Need help fixing a leaky faucet and installing a ceiling fan",
+        "title": f"Smoke Test Job {test_suffix}",
+        "description": "Smoke test for offline payment flow - fix kitchen sink",
         "zip": "87101",
         "preferred_timing": "this_week",
-        "client_name": f"Test Client {test_suffix}",
-        "client_phone": f"555-{test_suffix[:4]}",
+        "client_name": f"Smoke Client {test_suffix}",
+        "client_phone": f"505-{test_suffix[:4]}",
         "client_email": client_email,
         "is_test": True
     }
