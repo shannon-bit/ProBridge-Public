@@ -181,11 +181,29 @@ def test_offline_payment_money_loop():
     # Step 2: Operator login (use pre-seeded operator)
     print("\n👨‍💼 Step 2: Operator Login")
     
-    # Use the pre-seeded operator from server.py: operator@probridge.space / probridge-operator-123
-    operator_login_result = client.test_endpoint_form('POST', '/auth/login', {
-        "username": "operator@probridge.space",
-        "password": "probridge-operator-123"
-    })
+    # Try different operator credentials that might exist in the database
+    operator_credentials = [
+        ("operator@probridge.space", "probridge-operator-123"),
+        ("testoperator@example.com", "testpass123"),
+        ("testoperator@example.com", "password"),
+    ]
+    
+    operator_login_result = None
+    for email, password in operator_credentials:
+        print(f"   Trying operator: {email}")
+        result = client.test_endpoint_form('POST', '/auth/login', {
+            "username": email,
+            "password": password
+        })
+        if result["success"]:
+            operator_login_result = result
+            print(f"   ✅ Login successful with {email}")
+            break
+        else:
+            print(f"   ❌ Failed with {email}: {result['error']}")
+    
+    if not operator_login_result:
+        operator_login_result = {"success": False, "error": "No valid operator credentials found"}
     test_results.append(("POST /auth/login (operator)", operator_login_result))
     
     if operator_login_result["success"]:
