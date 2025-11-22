@@ -543,7 +543,19 @@ async def get_contractor_profile_for_user(user_id: str) -> Optional[Dict[str, An
 async def send_client_job_received_email(job: Job, client_email: Optional[str]):
     if not client_email:
         return
-    frontend_base = os.environ.get("FRONTEND_URL", "https://probridge.space").rstrip("/")
+    frontend_base = os.environ.get("FRONTEND_URL")
+    if not frontend_base:
+        # If FRONTEND_URL is not set, skip including link rather than using a hardcoded fallback
+        subject = "We received your ProBridge request"
+        body = (
+            f"Hi {job.id[:8]},\n\n"
+            f"Thanks for submitting your request with ProBridge. "
+            "We received your job but cannot generate a status link right now.\n\n"
+            "— ProBridge"
+        )
+        await send_smtp_email(client_email, subject, body)
+        return
+    frontend_base = frontend_base.rstrip("/")
     status_url = f"{frontend_base}/jobs/{job.id}/status?token={job.client_view_token}"
     subject = "We received your ProBridge request"
     body = (
