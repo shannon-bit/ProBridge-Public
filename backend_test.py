@@ -43,18 +43,22 @@ class ProBridgeTestClient:
                 response = self.session.patch(url, json=data, params=params, headers=test_headers, timeout=30)
             else:
                 return {"success": False, "error": f"Unsupported method: {method}"}
+            
+            # Try to parse JSON response, but capture raw text if it fails
+            try:
+                response_data = response.json() if response.content else {}
+            except json.JSONDecodeError:
+                response_data = {"raw_response": response.text}
                 
             return {
                 "success": response.status_code < 400,
                 "status_code": response.status_code,
-                "data": response.json() if response.content else {},
-                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:200]}"
+                "data": response_data,
+                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:500]}"
             }
             
         except requests.exceptions.RequestException as e:
             return {"success": False, "error": f"Request failed: {str(e)}"}
-        except json.JSONDecodeError as e:
-            return {"success": False, "error": f"JSON decode error: {str(e)}"}
         except Exception as e:
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
     
