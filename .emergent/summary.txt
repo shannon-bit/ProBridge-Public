@@ -1,0 +1,87 @@
+<analysis>
+The trajectory documents the evolution of ProBridge, a local services marketplace, from a functional MVP to a launch-ready application, while navigating significant feature pivots and persistent deployment challenges. The user, taking over the project, initially requested UI/UX adjustments, such as moving navigation pills to the footer. This quickly escalated to hydrating a Referral feature with a full backend endpoint and frontend UI.
+
+A major portion of the work involved integrating Zoho for SMTP-based transactional emails and then a critical pivot away from Stripe for payments. The user, citing issues with Stripe, mandated a switch to an offline/manual payment system based on Zelle. This required substantial changes to the backend's payment logic, introducing a  flag and new operator-led confirmation endpoints. The frontend was updated to display Zelle instructions, including a QR code, and a client-side Payment Sent button was added after some debate.
+
+The most recent and frustrating phase has been a series of  deployment errors on the Emergent platform. The AI troubleshooted this by fixing a  dependency issue, resolving multiple React JSX syntax errors, and finally, making Stripe environment variables optional at import time to prevent the backend from crashing on startup. The code is now believed to be build-ready, but deployment is blocked by platform-level configuration issues. The user's primary language is English; all further communication should be in English.
+</analysis>
+
+<product_requirements>
+ProBridge is a three-sided marketplace connecting clients, contractors, and a central operator.
+
+**Core User Roles & Flows:**
+1.  **Clients:** Submit job requests via a public form. They can now also log in via email to a simple dashboard listing all their jobs and their respective status links. For payment, they are shown offline instructions (Zelle) and can signal to the operator that payment has been sent.
+2.  **Contractors:** Sign up, log in, view, and accept job offers. They manage their active jobs and mark them complete, which triggers a payout record.
+3.  **Operator:** Manages the entire lifecycle from a central dashboard, including reviewing jobs, sending quotes, and crucially, manually confirming receipt of offline (Zelle) payments to move the job forward.
+
+**Key Features Implemented:**
+*   A FastAPI backend and React frontend.
+*   JWT Authentication for Contractors and Operators.
+*   **Offline Payment Flow:** The primary payment method was switched from Stripe to a manual Zelle-based system, toggled by a  environment variable. The client UI displays Zelle details and a QR code.
+*   **Referral System:** A complete referral intake form and backend endpoint to store submissions.
+*   **SMTP Email Notifications:** Transactional emails (job received, quote ready, etc.) are sent via Zoho.
+</product_requirements>
+
+<key_technical_concepts>
+- **Backend:** FastAPI (Python) with Motor for async MongoDB access.
+- **Frontend:** React.js, using  for the Zelle QR code.
+- **Authentication:** JWT for contractors/operators. Clients use a token-based status link and a simple email-based job lookup for their dashboard.
+- **Payments:** Switched from Stripe to a manual flow. A  environment variable in the backend controls this logic.
+- **Email:** Zoho SMTP integration for transactional emails.
+- **Deployment:** Emergent platform, which uses Kaniko for builds and Supervisor for process management.
+</key_technical_concepts>
+
+<code_architecture>
+The application is a monorepo with  and  directories.
+
+
+
+-   ****
+    -   **Importance:** This monolithic file is the entire FastAPI application, containing all models, database logic, and API endpoints for all roles. It houses the core business logic.
+    -   **Summary of Changes:**
+        1.  **Offline Payment Logic:** The  endpoint was refactored to check a  environment variable. If set to offline, it bypasses Stripe, creates a  record with , and sets the job status to .
+        2.  **New Endpoints:** Added  for the operator to confirm offline payments, which triggers the . Also added  for the client's Payment Sent button, and  for the new email-based client dashboard.
+        3.  **Stripe De-escalation:** The  initialization was wrapped in a conditional check () to prevent the app from crashing at startup if Stripe keys are not in the environment.
+        4.  **Dependency Fix:** The  library version was pinned to  in  to resolve a runtime incompatibility with .
+        5.  **Email Unification:** Email helpers were updated to use a single  mailbox, configured via  and  env vars.
+
+-   ****
+    -   **Importance:** This monolithic file contains the entire React frontend, including routing, all UI components, and API calls.
+    -   **Summary of Changes:**
+        1.  **Footer Navigation:** The header pills were removed and replaced with a global  component providing explicit Sign Up and Log In options for different roles.
+        2.  **Client Dashboard:** A new  component was added to allow clients to enter their email and view a list of their jobs.
+        3.  **Zelle Payment UI:** The  was heavily modified. When a job is , it now displays the payment amount, the Zelle phone number (), a memo instruction, and a QR code generated with . It also includes the Payment Sent button.
+        4.  **Build Fixes:** Multiple JSX syntax errors and duplicated code blocks were fixed to resolve recurring yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. failures.
+
+-   ** & **
+    -   **Importance:** These files configure the application's environment. They became a major focus during deployment troubleshooting.
+    -   **Summary of Changes:**  was updated to include , , , , and . Stripe-related keys were made optional or removed. The user was instructed that these files need to be saved to the Git repository to resolve deployment blockers.
+</code_architecture>
+
+<pending_tasks>
+- **Final Deployment:** The user must trigger a final, clean deployment on the Emergent platform. This involves:
+  1.  Clicking Save to GitHub to commit the  files and all code changes.
+  2.  Using the standard Deploy button, *not* Fix with agent.
+- **Post-Launch Enhancements:**
+  - Implement a full client account system (v2).
+  - Automate contractor payouts via Stripe Connect (v2).
+</pending_tasks>
+
+<current_work>
+The immediate work revolves around resolving a persistent deployment failure on the Emergent platform, which manifests as . The AI engineer has been working to diagnose and fix the root cause.
+
+The AI's investigation went through several stages:
+1.  **Initial Diagnosis:** The  repeatedly flagged missing .env files and missing supervisor config as blockers. The AI correctly identified these as platform-level configurations that are not code errors but relate to the contents of the Git snapshot used for the build.
+2.  **Code-Level Bug Fixes:** Deeper investigation and local builds revealed and fixed several true code blockers:
+    *   A runtime  from a / version mismatch was resolved by pinning .
+    *   Multiple  errors in  were corrected, allowing yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. to pass.
+3.  **Final Insight & Fix:** The AI deduced that a key reason the backend might crash on startup in production was the hard requirement for Stripe environment variables in  (). This was fixed by making the Stripe initialization optional, so the backend can start even if the Stripe keys are removed from the environment.
+
+The current state is that the codebase is believed to be free of build-blocking errors. The final action was advising the user on the correct deployment procedure to get past the platform-level configuration errors.
+</current_work>
+
+<optional_next_step>
+Guide the user to perform the final deployment sequence: click Save to GitHub, then Deploy. If it fails, I will ask for the specific error from the Kaniko build logs to provide a definitive fix.
+</optional_next_step>
