@@ -659,11 +659,20 @@ function JobStatusPage() {
                       <Button
                         onClick={handleApproveAndPay}
                   {job.status === "awaiting_payment" && (
-                    <p className="text-xs text-slate-600" data-testid="job-awaiting-payment-copy">
-                      Your quote is approved. Please follow the payment instructions we sent you (for example, pay via Zelle to
-                      the email shown in your confirmation). We’ll
-                      confirm and schedule your pro once payment is received.
-                    </p>
+                    <div className="flex items-center gap-2 mt-2" data-testid="job-awaiting-payment-copy">
+                      <p className="text-xs text-slate-600">
+                        Your quote is approved. Please follow the payment instructions we sent you (for example, pay via Zelle to
+                        the email shown in your confirmation). We’ll confirm and schedule your pro once payment is received.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={handleClientPaymentSent}
+                        data-testid="client-payment-sent-button"
+                      >
+                        Payment Sent
+                      </Button>
+                    </div>
                   )}
 
                         disabled={approving}
