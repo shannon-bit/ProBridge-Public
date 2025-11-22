@@ -333,6 +333,25 @@ async def ensure_seed_data() -> None:
         }
         await db.users.insert_one(operator_user)
 
+    # Ensure primary operator account for Shannon exists even if other operators are present
+    primary_email = "shannon@probridge.space"
+    existing_primary = await db.users.find_one({"email": primary_email})
+    if not existing_primary:
+        now = datetime.now(timezone.utc)
+        primary_operator = {
+            "id": str(uuid.uuid4()),
+            "name": "Shannon (Primary Operator)",
+            "email": primary_email,
+            "phone": None,
+            "role": "operator",
+            "status": "active",
+            "password_hash": get_password_hash("ProBridge-Operator-001!"),
+            "created_at": now,
+            "last_login_at": None,
+        }
+        await db.users.insert_one(primary_operator)
+
+
 
         await db.service_categories.insert_many(cats)
 
