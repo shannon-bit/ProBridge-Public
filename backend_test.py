@@ -540,19 +540,27 @@ def print_test_summary(test_results):
 
 if __name__ == "__main__":
     try:
-        print("🚀 ProBridge Backend Smoke Test")
+        print("🚀 ProBridge Backend - Operator Quote Creation Test")
         print(f"Testing against: {BASE_URL}")
         print("=" * 60)
         
-        # Test 1: Basic startup sanity
+        # Focus on the specific operator quote creation endpoint test
+        quote_test_results = test_operator_quote_creation()
+        
+        print_test_summary(quote_test_results)
+        
+        # Also run basic sanity check to ensure backend is responsive
+        print("\n" + "=" * 60)
+        print("🔍 Basic Backend Health Check")
+        print("=" * 60)
         startup_results = test_basic_startup_sanity()
         
-        # Test 2: Offline payment money loop
-        money_loop_results = test_offline_payment_money_loop()
+        # Combine all results for final summary
+        all_results = quote_test_results + startup_results
         
-        # Combine results
-        all_results = startup_results + money_loop_results
-        
+        print("\n" + "=" * 60)
+        print("📊 FINAL COMPREHENSIVE SUMMARY")
+        print("=" * 60)
         print_test_summary(all_results)
         
     except Exception as e:
