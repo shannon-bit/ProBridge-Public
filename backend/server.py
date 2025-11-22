@@ -570,7 +570,18 @@ async def send_client_job_received_email(job: Job, client_email: Optional[str]):
 async def send_client_quote_ready_email(job: Job, client_email: Optional[str]):
     if not client_email:
         return
-    frontend_base = os.environ.get("FRONTEND_URL", "https://probridge.space").rstrip("/")
+    frontend_base = os.environ.get("FRONTEND_URL")
+    if not frontend_base:
+        # If FRONTEND_URL is not set, skip including link rather than using a hardcoded fallback
+        subject = "Your ProBridge quote is ready"
+        body = (
+            f"Hi {job.id[:8]},\n\n"
+            "Your quote is ready, but we cannot generate a review link right now.\n\n"
+            "— ProBridge"
+        )
+        await send_smtp_email(client_email, subject, body)
+        return
+    frontend_base = frontend_base.rstrip("/")
     status_url = f"{frontend_base}/jobs/{job.id}/status?token={job.client_view_token}"
     subject = "Your ProBridge quote is ready"
     body = (
