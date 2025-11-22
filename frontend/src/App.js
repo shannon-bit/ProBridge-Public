@@ -1188,6 +1188,40 @@ function OperatorDashboard() {
                               className="w-40"
                               data-testid="operator-update-status-select"
                             >
+                      {selectedJobHasOfflinePendingPayment && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              await axios.post(
+                                `/operator/jobs/${selectedJobId}/mark-paid`,
+                                {},
+                                { headers: { Authorization: `Bearer ${token}` } },
+                              );
+                              toast({
+                                title: "Payment marked received",
+                                description: "Job has been confirmed.",
+                              });
+                              const res = await axios.get("/operator/jobs", {
+                                params: filters,
+                                headers: { Authorization: `Bearer ${token}` },
+                              });
+                              setJobs(res.data);
+                            } catch (err) {
+                              console.error("Mark payment received failed", err);
+                              toast({
+                                title: "Unable to mark payment received",
+                                description: "Please try again.",
+                              });
+                            }
+                          }}
+                          data-testid="operator-mark-payment-received-button"
+                        >
+                          Mark payment received
+                        </Button>
+                      )}
+
                               <SelectValue placeholder="Choose status" />
                             </SelectTrigger>
                             <SelectContent>
