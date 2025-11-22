@@ -12,21 +12,9 @@ import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-# Get backend URL from environment (REACT_APP_BACKEND_URL from frontend/.env)
-def get_backend_url():
-    # Try to read from frontend/.env
-    try:
-        with open('/app/frontend/.env', 'r') as f:
-            for line in f:
-                if line.startswith('REACT_APP_BACKEND_URL='):
-                    return line.split('=', 1)[1].strip()
-    except:
-        pass
-    # Fallback
-    return "https://probridge.space/api"
-
-BASE_URL = get_backend_url()
-print(f"Using backend URL: {BASE_URL}")
+# Use local backend for smoke testing (since we're testing the running instance)
+BASE_URL = "http://localhost:8001/api"
+print(f"Using local backend URL: {BASE_URL}")
 
 class ProBridgeTestClient:
     def __init__(self):
