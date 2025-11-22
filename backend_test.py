@@ -104,14 +104,54 @@ class ProBridgeTestClient:
         except Exception as e:
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
-def test_money_loop():
-    """Test the complete ProBridge money loop"""
+def test_basic_startup_sanity():
+    """Test basic startup sanity - FastAPI app imports correctly, no Stripe env required"""
     client = ProBridgeTestClient()
     test_results = []
     
-    print("🚀 Starting ProBridge Backend Money Loop Test")
-    print(f"Testing against: {BASE_URL}")
-    print("=" * 60)
+    print("🔍 Testing Basic Startup Sanity")
+    print("=" * 40)
+    
+    # Test root endpoint
+    root_result = client.test_endpoint('GET', '/')
+    test_results.append(("GET / (root)", root_result))
+    
+    if root_result["success"]:
+        print("✅ Root endpoint accessible - FastAPI app started correctly")
+        print(f"   Response: {root_result['data']}")
+    else:
+        print(f"❌ Root endpoint failed: {root_result['error']}")
+    
+    # Test meta endpoints (should work without auth)
+    cities_result = client.test_endpoint('GET', '/meta/cities')
+    test_results.append(("GET /meta/cities", cities_result))
+    
+    if cities_result["success"]:
+        print("✅ Cities endpoint working - basic DB connectivity OK")
+        cities = cities_result["data"]
+        print(f"   Found {len(cities)} cities")
+    else:
+        print(f"❌ Cities endpoint failed: {cities_result['error']}")
+    
+    categories_result = client.test_endpoint('GET', '/meta/service-categories')
+    test_results.append(("GET /meta/service-categories", categories_result))
+    
+    if categories_result["success"]:
+        print("✅ Service categories endpoint working")
+        categories = categories_result["data"]
+        print(f"   Found {len(categories)} service categories")
+    else:
+        print(f"❌ Service categories endpoint failed: {categories_result['error']}")
+    
+    return test_results
+
+def test_offline_payment_money_loop():
+    """Test offline payment money loop: create job -> operator quote -> client approve -> offline payment"""
+    client = ProBridgeTestClient()
+    test_results = []
+    
+    print("\n💰 Testing Offline Payment Money Loop")
+    print("=" * 50)
     
     # Test data
     test_suffix = str(uuid.uuid4())[:8]
