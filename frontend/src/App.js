@@ -661,10 +661,34 @@ function JobStatusPage() {
                         onClick={handleApproveAndPay}
                   {job.status === "awaiting_payment" && (
                     <div className="flex items-center gap-2 mt-2" data-testid="job-awaiting-payment-copy">
-                      <p className="text-xs text-slate-600">
-                        Your quote is approved. Please follow the payment instructions we sent you (for example, pay via Zelle to
-                        the email shown in your confirmation). We’ll confirm and schedule your pro once payment is received.
-                      </p>
+                      <div className="text-xs text-slate-600 space-y-1">
+                        <p>
+                          Your quote is approved. To confirm your booking, please send payment via Zelle using the details
+                          below.
+                        </p>
+                        <p>
+                          <span className="font-semibold">Amount:</span> ${" "}
+                          {(job.quote_total_cents / 100).toFixed(2)} USD
+                        </p>
+                        <p>
+                          <span className="font-semibold">Zelle:</span> 505-645-4772
+                        </p>
+                        <p>
+                          <span className="font-semibold">Memo:</span> Job ID {job.id}
+                        </p>
+                        <div className="mt-1 flex flex-col items-start gap-1">
+                          <span className="text-[11px] text-slate-500">Optional: scan this QR for your notes app or bank.</span>
+                          <div className="bg-white p-2 rounded border border-slate-200" data-testid="offline-payment-qr">
+                            <QRCodeCanvas
+                              value={`Pay via Zelle\nTo: 505-645-4772\nAmount: $${(job.quote_total_cents / 100).toFixed(
+                                2,
+                              )}\nMemo: Job ID ${job.id}`}
+                              size={96}
+                              includeMargin={false}
+                            />
+                          </div>
+                        </div>
+                      </div>
                       <Button
                         variant="outline"
                         size="xs"
