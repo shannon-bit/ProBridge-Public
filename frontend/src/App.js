@@ -567,6 +567,25 @@ function JobStatusPage() {
       setApproving(false);
     }
   }
+  async function handleClientPaymentSent() {
+    if (!jobId || !token) return;
+    try {
+      await axios.post(`/jobs/${jobId}/client-mark-payment-sent`, { token });
+      const statusRes = await axios.get(`/jobs/${jobId}/status`, { params: { token } });
+      setJob(statusRes.data);
+      toast({
+        title: "Thanks – payment marked as sent",
+        description: "We\'ll review and confirm once we see it.",
+      });
+    } catch (err) {
+      console.error("client-mark-payment-sent failed", err);
+      toast({
+        title: "Could not mark payment sent",
+        description: "Please try again in a moment.",
+      });
+    }
+  }
+
 
   const isMatching = job && (job.status === "new" || job.status === "offering_contractors");
   const hasQuoteReady = job && job.quote_status === "sent_to_client" && job.status === "quote_sent";
