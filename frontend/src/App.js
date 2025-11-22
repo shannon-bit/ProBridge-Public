@@ -847,6 +847,8 @@ function OperatorDashboard() {
   }, [token, contractorTab]);
 
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null;
+  const selectedJobHasOfflinePendingPayment =
+    selectedJob && selectedJob.status === "awaiting_payment";
 
   const suggestedTotalCents = selectedJob?.pricing_suggestion?.suggested_total_cents ?? null;
   const hasSuggestion = suggestedTotalCents != null;
