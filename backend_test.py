@@ -194,182 +194,70 @@ def test_offline_payment_money_loop():
         print(f"❌ Job creation failed: {job_result['error']}")
         return test_results
     
-    # Step 3: Check job status
-    print("\n📊 Step 3: Job Status Check")
+    # Step 2: Operator login (use pre-seeded operator)
+    print("\n👨‍💼 Step 2: Operator Login")
     
-    status_result = client.test_endpoint('GET', f'/jobs/{test_state["job_id"]}/status', 
-                                       params={"token": test_state["client_view_token"]})
-    test_results.append(("GET /jobs/{job_id}/status", status_result))
-    
-    if status_result["success"]:
-        print("✅ Job status check successful")
-        print(f"   Status: {status_result['data']['status']}")
-    else:
-        print(f"❌ Job status check failed: {status_result['error']}")
-    
-    # Step 4: Create contractor account
-    print("\n🔨 Step 4: Contractor Signup")
-    
-    contractor_data = {
-        "name": f"Test Contractor {test_suffix}",
-        "email": contractor_email,
-        "phone": f"555-{test_suffix[:4]}",
-        "password": "testpass123",
-        "city_slug": "abq",
-        "base_zip": "87101",
-        "radius_miles": 25,
-        "service_category_ids": [],  # Will be populated after getting categories
-        "bio": "Experienced handyman with 10+ years experience"
-    }
-    
-    # Get service category IDs
-    if categories_result["success"] and categories_result["data"]:
-        handyman_cat = next((cat for cat in categories_result["data"] if cat["slug"] == "handyman"), None)
-        if handyman_cat:
-            contractor_data["service_category_ids"] = [handyman_cat["id"]]
-    
-    contractor_signup_result = client.test_endpoint('POST', '/contractors/signup', contractor_data)
-    test_results.append(("POST /contractors/signup", contractor_signup_result))
-    
-    if contractor_signup_result["success"]:
-        print("✅ Contractor signup successful")
-        contractor_id = contractor_signup_result["data"]["contractor_id"]
-        print(f"   Contractor ID: {contractor_id}")
-    else:
-        print(f"❌ Contractor signup failed: {contractor_signup_result['error']}")
-    
-    # Step 5: Contractor login
-    print("\n🔑 Step 5: Contractor Login")
-    
-    # FastAPI OAuth2PasswordRequestForm expects form data, not JSON
-    contractor_login_result = client.test_endpoint_form('POST', '/auth/login', {
-        "username": contractor_email,
-        "password": "testpass123"
+    # Use the pre-seeded operator from server.py: operator@probridge.space / probridge-operator-123
+    operator_login_result = client.test_endpoint_form('POST', '/auth/login', {
+        "username": "operator@probridge.space",
+        "password": "probridge-operator-123"
     })
-    test_results.append(("POST /auth/login (contractor)", contractor_login_result))
+    test_results.append(("POST /auth/login (operator)", operator_login_result))
     
-    if contractor_login_result["success"]:
-        print("✅ Contractor login successful")
-        test_state["contractor_token"] = contractor_login_result["data"]["access_token"]
+    if operator_login_result["success"]:
+        print("✅ Operator login successful")
+        test_state["operator_token"] = operator_login_result["data"]["access_token"]
     else:
-        print(f"❌ Contractor login failed: {contractor_login_result['error']}")
+        print(f"❌ Operator login failed: {operator_login_result['error']}")
+        return test_results
     
-    # Step 6: Check contractor offers
-    print("\n📋 Step 6: Contractor Offers Check")
+    # Step 3: Create and send quote
+    print("\n💰 Step 3: Create Quote")
     
-    if test_state["contractor_token"]:
-        auth_headers = {"Authorization": f"Bearer {test_state['contractor_token']}"}
-        offers_result = client.test_endpoint('GET', '/contractors/me/offers', headers=auth_headers)
-        test_results.append(("GET /contractors/me/offers", offers_result))
-        
-        if offers_result["success"]:
-            print("✅ Contractor offers check successful")
-            offers = offers_result["data"]
-            print(f"   Available offers: {len(offers)}")
-            
-            # Check if our job is in the offers
-            our_job_offer = next((offer for offer in offers if offer["id"] == test_state["job_id"]), None)
-            if our_job_offer:
-                print("✅ Our test job found in contractor offers")
-            else:
-                print("⚠️  Our test job not found in contractor offers")
-        else:
-            print(f"❌ Contractor offers check failed: {offers_result['error']}")
-    
-    # Step 7: Contractor accepts offer
-    print("\n✋ Step 7: Contractor Accept Offer")
-    
-    if test_state["contractor_token"] and test_state["job_id"]:
-        auth_headers = {"Authorization": f"Bearer {test_state['contractor_token']}"}
-        accept_result = client.test_endpoint('POST', f'/contractors/offers/{test_state["job_id"]}/accept', 
-                                           headers=auth_headers)
-        test_results.append(("POST /contractors/offers/{job_id}/accept", accept_result))
-        
-        if accept_result["success"]:
-            print("✅ Contractor offer acceptance successful")
-            print(f"   New job status: {accept_result['data']['status']}")
-        else:
-            print(f"❌ Contractor offer acceptance failed: {accept_result['error']}")
-    
-    # Step 8: Create operator account (simulate existing operator)
-    print("\n👨‍💼 Step 8: Operator Access")
-    
-    # For testing, we'll try to create an operator user directly or use admin simulation
-    # First, let's try the admin simulation endpoint
-    admin_sim_result = client.test_endpoint('POST', '/admin/run-simulation')
-    test_results.append(("POST /admin/run-simulation", admin_sim_result))
-    
-    if admin_sim_result["success"]:
-        print("✅ Admin simulation endpoint accessible")
-    else:
-        print(f"⚠️  Admin simulation not accessible: {admin_sim_result['error']}")
-    
-    # For operator functionality, we need to create an operator user
-    # This might require direct database access or a different approach
-    print("⚠️  Operator testing requires pre-existing operator account")
-    
-    # Step 9: Test operator job listing (without auth for now)
-    print("\n📊 Step 9: Operator Job Listing")
-    
-    operator_jobs_result = client.test_endpoint('GET', '/operator/jobs')
-    test_results.append(("GET /operator/jobs", operator_jobs_result))
-    
-    if operator_jobs_result["success"]:
-        print("✅ Operator jobs endpoint accessible")
-        jobs = operator_jobs_result["data"]
-        print(f"   Total jobs found: {len(jobs)}")
-    else:
-        print(f"❌ Operator jobs endpoint failed: {operator_jobs_result['error']}")
-        print("   This likely requires operator authentication")
-    
-    # Step 10: Test quote creation (would need operator auth)
-    print("\n💰 Step 10: Quote Creation")
-    
-    if test_state["job_id"]:
+    if test_state["job_id"] and test_state["operator_token"]:
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
         quote_data = {
             "line_items": [
                 {
                     "type": "base",
-                    "label": "Faucet repair",
+                    "label": "Kitchen sink repair",
                     "quantity": 1,
-                    "unit_price_cents": 8500,
-                    "metadata": {"description": "Fix leaky kitchen faucet"}
-                },
-                {
-                    "type": "base", 
-                    "label": "Ceiling fan installation",
-                    "quantity": 1,
-                    "unit_price_cents": 12000,
-                    "metadata": {"description": "Install new ceiling fan in living room"}
+                    "unit_price_cents": 15000,
+                    "metadata": {"description": "Fix kitchen sink - smoke test"}
                 }
             ]
         }
         
-        quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/quotes', quote_data)
+        quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/quotes', 
+                                          quote_data, headers=auth_headers)
         test_results.append(("POST /operator/jobs/{job_id}/quotes", quote_result))
         
         if quote_result["success"]:
             print("✅ Quote creation successful")
             test_state["quote_id"] = quote_result["data"]["id"]
+            print(f"   Quote ID: {test_state['quote_id']}")
+            print(f"   Total: ${quote_result['data']['total_price_cents'] / 100:.2f}")
         else:
             print(f"❌ Quote creation failed: {quote_result['error']}")
-            print("   This requires operator authentication")
+            return test_results
     
-    # Step 11: Test quote sending
-    print("\n📤 Step 11: Quote Sending")
+    # Step 4: Send quote to client
+    print("\n📤 Step 4: Send Quote")
     
-    if test_state["job_id"]:
-        send_quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/send-quote')
+    if test_state["job_id"] and test_state["operator_token"]:
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        send_quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/send-quote',
+                                               headers=auth_headers)
         test_results.append(("POST /operator/jobs/{job_id}/send-quote", send_quote_result))
         
         if send_quote_result["success"]:
             print("✅ Quote sending successful")
         else:
             print(f"❌ Quote sending failed: {send_quote_result['error']}")
-            print("   This requires operator authentication")
+            return test_results
     
-    # Step 12: Test quote approval (client side)
-    print("\n✅ Step 12: Quote Approval")
+    # Step 5: Client approves quote (triggers offline payment)
+    print("\n✅ Step 5: Client Approves Quote (Offline Payment)")
     
     if test_state["job_id"] and test_state["client_view_token"]:
         approve_data = {"token": test_state["client_view_token"]}
@@ -378,33 +266,35 @@ def test_offline_payment_money_loop():
         
         if approve_result["success"]:
             print("✅ Quote approval successful")
-            print(f"   Checkout URL: {approve_result['data'].get('checkout_url', 'N/A')}")
+            print(f"   Payment mode: {approve_result['data'].get('payment_mode', 'N/A')}")
             print(f"   New status: {approve_result['data']['status']}")
+            
+            # Should transition to awaiting_payment for offline mode
+            if approve_result['data']['status'] == 'awaiting_payment':
+                print("✅ Job correctly transitioned to awaiting_payment")
+            else:
+                print(f"⚠️  Expected awaiting_payment, got {approve_result['data']['status']}")
         else:
             print(f"❌ Quote approval failed: {approve_result['error']}")
+            return test_results
     
-    # Step 13: Test job completion
-    print("\n🏁 Step 13: Job Completion")
+    # Step 6: Operator marks payment as received
+    print("\n💳 Step 6: Operator Marks Payment Received")
     
-    if test_state["contractor_token"] and test_state["job_id"]:
-        auth_headers = {"Authorization": f"Bearer {test_state['contractor_token']}"}
-        complete_data = {
-            "completion_note": "Successfully repaired faucet and installed ceiling fan. Customer satisfied.",
-            "photos": []
-        }
+    if test_state["job_id"] and test_state["operator_token"]:
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        mark_paid_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/mark-payment-received',
+                                              headers=auth_headers)
+        test_results.append(("POST /operator/jobs/{job_id}/mark-payment-received", mark_paid_result))
         
-        complete_result = client.test_endpoint('POST', f'/contractors/jobs/{test_state["job_id"]}/mark-complete',
-                                             complete_data, headers=auth_headers)
-        test_results.append(("POST /contractors/jobs/{job_id}/mark-complete", complete_result))
-        
-        if complete_result["success"]:
-            print("✅ Job completion successful")
-            print(f"   Final status: {complete_result['data']['status']}")
+        if mark_paid_result["success"]:
+            print("✅ Payment marking successful")
+            print(f"   Payment status: {mark_paid_result['data'].get('status', 'N/A')}")
         else:
-            print(f"❌ Job completion failed: {complete_result['error']}")
+            print(f"❌ Payment marking failed: {mark_paid_result['error']}")
     
-    # Final status check
-    print("\n🔍 Final: Job Status Verification")
+    # Step 7: Final status check
+    print("\n🔍 Step 7: Final Job Status Check")
     
     if test_state["job_id"] and test_state["client_view_token"]:
         final_status_result = client.test_endpoint('GET', f'/jobs/{test_state["job_id"]}/status',
@@ -413,12 +303,18 @@ def test_offline_payment_money_loop():
         
         if final_status_result["success"]:
             print("✅ Final job status check successful")
-            print(f"   Final status: {final_status_result['data']['status']}")
+            final_status = final_status_result['data']['status']
+            print(f"   Final status: {final_status}")
+            
+            # Should be 'confirmed' after payment received
+            if final_status == 'confirmed':
+                print("✅ Offline payment flow completed successfully")
+            else:
+                print(f"⚠️  Expected 'confirmed' status, got '{final_status}'")
+                
             quote_total = final_status_result['data'].get('quote_total_cents')
             if quote_total is not None:
                 print(f"   Quote total: ${quote_total / 100:.2f}")
-            else:
-                print("   Quote total: Not available")
         else:
             print(f"❌ Final job status check failed: {final_status_result['error']}")
     
