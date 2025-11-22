@@ -682,7 +682,7 @@ function JobStatusPage() {
                           {(job.quote_total_cents / 100).toFixed(2)} USD
                         </p>
                         <p>
-                          <span className="font-semibold">Zelle:</span> 505-645-4772
+                          <span className="font-semibold">Zelle:</span> {process.env.REACT_APP_ZELLE_PHONE || "505-645-4772"}
                         </p>
                         <p>
                           <span className="font-semibold">Memo:</span> Job ID {job.id}
