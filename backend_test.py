@@ -337,6 +337,181 @@ def test_offline_payment_money_loop():
     
     return test_results
 
+def test_operator_quote_creation():
+    """
+    Specific test for operator quote creation endpoint after latest changes.
+    Tests: 1) Authenticate as operator, 2) Find quote-eligible job, 3) Create quote, 4) Verify response
+    """
+    client = ProBridgeTestClient()
+    test_results = []
+    
+    print("\n🎯 Testing Operator Quote Creation Endpoint")
+    print("=" * 50)
+    
+    # Step 1: Operator authentication
+    print("\n👨‍💼 Step 1: Operator Authentication")
+    
+    # Try the seeded operator credentials
+    operator_credentials = [
+        ("operator@probridge.space", "probridge-operator-123"),
+        ("testoperator@example.com", "testpass123"),
+        ("testoperator@example.com", "password"),
+    ]
+    
+    operator_token = None
+    for email, password in operator_credentials:
+        print(f"   Trying operator: {email}")
+        result = client.test_endpoint_form('POST', '/auth/login', {
+            "username": email,
+            "password": password
+        })
+        test_results.append((f"POST /auth/login ({email})", result))
+        
+        if result["success"]:
+            operator_token = result["data"]["access_token"]
+            print(f"   ✅ Login successful with {email}")
+            break
+        else:
+            print(f"   ❌ Failed with {email}: {result['error']}")
+    
+    if not operator_token:
+        print("❌ CRITICAL: No valid operator credentials found - cannot proceed with quote testing")
+        return test_results
+    
+    # Step 2: Fetch jobs to find quote-eligible ones
+    print("\n📋 Step 2: Fetch Jobs for Quote Creation")
+    
+    auth_headers = {"Authorization": f"Bearer {operator_token}"}
+    
+    # Get all jobs first
+    jobs_result = client.test_endpoint('GET', '/operator/jobs', headers=auth_headers)
+    test_results.append(("GET /operator/jobs", jobs_result))
+    
+    if not jobs_result["success"]:
+        print(f"❌ Failed to fetch jobs: {jobs_result['error']}")
+        return test_results
+    
+    jobs = jobs_result["data"]
+    print(f"   Found {len(jobs)} total jobs")
+    
+    # Find jobs in quote-eligible states
+    quote_eligible_states = ["awaiting_quote", "offering_contractors"]
+    eligible_jobs = [job for job in jobs if job.get("status") in quote_eligible_states]
+    
+    print(f"   Found {len(eligible_jobs)} jobs in quote-eligible states: {quote_eligible_states}")
+    
+    if not eligible_jobs:
+        print("   No quote-eligible jobs found. Creating a test job...")
+        
+        # Create a test job to work with
+        test_suffix = str(uuid.uuid4())[:8]
+        job_data = {
+            "city_slug": "abq",
+            "service_category_slug": "handyman", 
+            "title": f"Quote Test Job {test_suffix}",
+            "description": "Test job for operator quote creation endpoint testing",
+            "zip": "87101",
+            "preferred_timing": "this_week",
+            "client_name": f"Quote Test Client {test_suffix}",
+            "client_phone": f"505-{test_suffix[:4]}",
+            "client_email": f"quoteclient_{test_suffix}@example.com",
+            "is_test": True
+        }
+        
+        job_create_result = client.test_endpoint('POST', '/jobs', job_data)
+        test_results.append(("POST /jobs (test job creation)", job_create_result))
+        
+        if job_create_result["success"]:
+            test_job_id = job_create_result["data"]["job_id"]
+            print(f"   ✅ Created test job: {test_job_id}")
+            
+            # Need to advance job to awaiting_quote state by simulating contractor acceptance
+            # For now, we'll try to use this job as-is or find another approach
+            target_job_id = test_job_id
+        else:
+            print(f"   ❌ Failed to create test job: {job_create_result['error']}")
+            return test_results
+    else:
+        # Use the first eligible job
+        target_job = eligible_jobs[0]
+        target_job_id = target_job["id"]
+        print(f"   Using existing job: {target_job_id} (status: {target_job.get('status')})")
+    
+    # Step 3: Create quote for the target job
+    print(f"\n💰 Step 3: Create Quote for Job {target_job_id}")
+    
+    quote_request = {
+        "line_items": [
+            {
+                "type": "base",
+                "label": "Service quote - endpoint test",
+                "quantity": 1,
+                "unit_price_cents": 12500,  # $125.00
+                "metadata": {"test": "operator_quote_creation_endpoint"}
+            }
+        ]
+    }
+    
+    quote_result = client.test_endpoint('POST', f'/operator/jobs/{target_job_id}/quotes', 
+                                      quote_request, headers=auth_headers)
+    test_results.append((f"POST /operator/jobs/{target_job_id}/quotes", quote_result))
+    
+    print(f"   Request payload: {json.dumps(quote_request, indent=2)}")
+    print(f"   Response status: {quote_result.get('status_code', 'N/A')}")
+    
+    if quote_result["success"]:
+        print("✅ Quote creation successful!")
+        quote_data = quote_result["data"]
+        
+        # Verify response structure matches QuoteOut shape
+        expected_fields = ["id", "job_id", "version", "status", "total_price_cents", "created_at"]
+        optional_fields = ["approved_at", "rejected_reason"]
+        
+        print("   📋 Verifying response structure:")
+        for field in expected_fields:
+            if field in quote_data:
+                print(f"   ✅ {field}: {quote_data[field]}")
+            else:
+                print(f"   ❌ Missing required field: {field}")
+        
+        for field in optional_fields:
+            if field in quote_data:
+                print(f"   ✅ {field}: {quote_data[field]}")
+            else:
+                print(f"   ℹ️  Optional field {field}: not present (OK)")
+        
+        # Verify specific values
+        if quote_data.get("job_id") == target_job_id:
+            print(f"   ✅ job_id matches: {target_job_id}")
+        else:
+            print(f"   ❌ job_id mismatch: expected {target_job_id}, got {quote_data.get('job_id')}")
+        
+        if quote_data.get("total_price_cents") == 12500:
+            print(f"   ✅ total_price_cents correct: {quote_data.get('total_price_cents')}")
+        else:
+            print(f"   ❌ total_price_cents incorrect: expected 12500, got {quote_data.get('total_price_cents')}")
+        
+        print(f"   📊 Quote created successfully:")
+        print(f"      - Quote ID: {quote_data.get('id')}")
+        print(f"      - Version: {quote_data.get('version')}")
+        print(f"      - Status: {quote_data.get('status')}")
+        print(f"      - Total: ${quote_data.get('total_price_cents', 0) / 100:.2f}")
+        
+    else:
+        print(f"❌ Quote creation failed!")
+        print(f"   Status Code: {quote_result.get('status_code', 'N/A')}")
+        print(f"   Error: {quote_result.get('error', 'Unknown error')}")
+        
+        # Check if this is the ObjectId serialization error
+        error_msg = quote_result.get('error', '').lower()
+        if 'objectid' in error_msg or 'not iterable' in error_msg or 'vars()' in error_msg:
+            print("   🚨 DETECTED: This appears to be the MongoDB ObjectId serialization error!")
+            print("   🔧 The ObjectId serialization crash is still present")
+        else:
+            print("   ℹ️  This appears to be a different error (not ObjectId serialization)")
+    
+    return test_results
+
 def print_test_summary(test_results):
     """Print a summary of all test results"""
     print("\n" + "=" * 60)
