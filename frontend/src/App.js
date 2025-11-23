@@ -326,6 +326,25 @@ function ClientHomePage() {
                       <SelectItem value="other" data-testid="input-category-option-other">
                         Other (describe below)
                       </SelectItem>
+
+              {form.city_slug === "expansion_other" && (
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="expansion-city-override" data-testid="label-expansion-city">
+                    Where are you located?
+                  </label>
+                  <Input
+                    id="expansion-city-override"
+                    data-testid="input-expansion-city"
+                    placeholder="City or region (e.g., Santa Fe, NM)"
+                    value={expansionCityOverride}
+                    onChange={(e) => setExpansionCityOverride(e.target.value)}
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    We&apos;ll use this to plan future ProBridge expansion.
+                  </p>
+                </div>
+              )}
+
                     </SelectContent>
                   </Select>
                 </div>
