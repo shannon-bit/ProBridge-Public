@@ -299,6 +299,9 @@ function ClientHomePage() {
                           {c.name}
                         </SelectItem>
                       ))}
+                      <SelectItem value="expansion_other" data-testid="input-city-option-expansion-other">
+                        My city is not listed
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
