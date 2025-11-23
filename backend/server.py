@@ -978,6 +978,43 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
 
     await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
 
+
+
+class ClientJobsRequest(BaseModel):
+    email: EmailStr
+
+
+class ClientJobSummary(BaseModel):
+    id: str
+    title: Optional[str] = None
+    status: JobStatus
+    client_view_token: str
+
+    model_config = ConfigDict(extra="ignore")
+
+
+@api_router.post("/client/jobs", response_model=List[ClientJobSummary])
+async def get_client_jobs(body: ClientJobsRequest):
+    """Look up a client's jobs by email.
+
+    This is a simple, read-only helper used by the lightweight /client/login UI.
+    It does not perform authentication – it just lists jobs associated with the
+    email address used when the job was created.
+    """
+    user = await db.users.find_one({"email": body.email})
+    if not user:
+        return []
+
+    cursor = (
+        db.jobs.find(
+            {"client_id": user["id"]},
+            {"_id": 0, "id": 1, "title": 1, "status": 1, "client_view_token": 1},
+        )
+        .sort("created_at", -1)
+    )
+    docs = await cursor.to_list(100)
+    return [ClientJobSummary(**doc) for doc in docs]
+
     return ApproveQuoteResponse(job_id=job_id, quote_id=quote["id"], checkout_url=checkout_url, status=new_status, payment_mode=payment_mode)
 
 
