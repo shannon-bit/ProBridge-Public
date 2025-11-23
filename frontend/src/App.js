@@ -176,6 +176,7 @@ function ClientHomePage() {
   const [otherDescription, setOtherDescription] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [statusLink, setStatusLink] = React.useState(null);
+  const [expansionCityOverride, setExpansionCityOverride] = React.useState("");
 
   const onChange = (field) => (e) => {
     const value = e?.target ? (e.target.type === "checkbox" ? e.target.checked : e.target.value) : e;
