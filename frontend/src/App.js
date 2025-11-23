@@ -213,6 +213,24 @@ function ClientHomePage() {
         is_test: form.is_test,
       };
       const res = await axios.post("/jobs", payload);
+
+      // Fire a lightweight expansion request when city is not listed
+      if (form.city_slug === "expansion_other" && expansionCityOverride.trim()) {
+        try {
+          await axios.post("/expansion-requests", {
+            role: "client",
+            email: form.client_email || undefined,
+            phone: form.client_phone || undefined,
+            requested_city: expansionCityOverride.trim(),
+            zip: form.zip || undefined,
+            service_type: finalServiceSlug || undefined,
+            note: finalDescription || undefined,
+          });
+        } catch (err) {
+          console.error("Client expansion request failed", err);
+          // Silent failure – do not block main flow
+        }
+      }
       const { job_id, client_view_token } = res.data;
       const link = `/jobs/${job_id}/status?token=${encodeURIComponent(client_view_token)}`;
       setStatusLink(link);
