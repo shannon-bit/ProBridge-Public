@@ -1662,6 +1662,17 @@ async def run_simulation(current_user: UserInDB = Depends(require_role("admin"))
 # -------------------------------------------------
 
 
+
+@app.get("/")
+async def app_root():
+    return {"status": "ok"}
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
 @api_router.get("/")
 async def root():
     return {"message": "Bridge Local Platform API"}
