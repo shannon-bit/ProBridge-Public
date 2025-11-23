@@ -1015,8 +1015,6 @@ async def get_client_jobs(body: ClientJobsRequest):
     docs = await cursor.to_list(100)
     return [ClientJobSummary(**doc) for doc in docs]
 
-    return ApproveQuoteResponse(job_id=job_id, quote_id=quote["id"], checkout_url=checkout_url, status=new_status, payment_mode=payment_mode)
-
 
 @api_router.post("/jobs/{job_id}/client-mark-payment-sent")
 async def client_mark_payment_sent(job_id: str, body: PaymentStatusIn):
