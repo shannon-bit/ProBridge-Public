@@ -822,6 +822,117 @@ function AuthForm({ title, onSubmit, submitting, dataTestIdPrefix }) {
 }
 
 // ------------------------
+// Client login (email-based)
+// ------------------------
+
+function ClientLoginPage() {
+  const { toast } = useToast();
+  const [email, setEmail] = React.useState("");
+  const [jobs, setJobs] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [touched, setTouched] = React.useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setTouched(true);
+    if (!email) return;
+    setLoading(true);
+    try {
+      const res = await axios.post("/client/jobs", { email });
+      setJobs(res.data || []);
+    } catch (err) {
+      console.error("Client jobs lookup failed", err);
+      toast({
+        title: "Could not look up jobs",
+        description: "Please double-check your email and try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="app-shell" data-testid="client-login-page">
+      <header className="app-header">
+        <div>
+          <div className="app-header-title">Find your ProBridge requests</div>
+          <div className="app-tagline">Enter your email to see jobs you&apos;ve requested.</div>
+        </div>
+      </header>
+      <main className="app-main">
+        <section>
+          <Card className="w-full max-w-md" data-testid="client-login-card">
+            <CardHeader>
+              <CardTitle className="text-base">Client Login</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-3" data-testid="client-login-form">
+                <div>
+                  <label className="text-xs text-slate-600" htmlFor="client-login-email">
+                    Email address
+                  </label>
+                  <Input
+                    id="client-login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    data-testid="client-login-email-input"
+                  />
+                  {touched && !email && (
+                    <p className="mt-1 text-[11px] text-red-600">Email is required.</p>
+                  )}
+                </div>
+                <Button type="submit" disabled={loading} data-testid="client-login-submit-button">
+                  {loading ? "Looking up jobs…" : "View my jobs"}
+                </Button>
+              </form>
+
+              {touched && !loading && email && (
+                <div className="mt-4 space-y-2" data-testid="client-login-results">
+                  {jobs.length === 0 ? (
+                    <p className="text-sm text-slate-500">No jobs found for this email yet.</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {jobs.map((job) => {
+                        const statusUrl = `/jobs/${job.id}/status?token=${encodeURIComponent(job.client_view_token)}`;
+                        return (
+                          <div
+                            key={job.id}
+                            className="flex items-center justify-between rounded border border-slate-200 px-2 py-1 text-xs"
+                            data-testid={`client-login-job-${job.id}`}
+                          >
+                            <div>
+                              <div className="font-medium">{job.title || "Untitled request"}</div>
+                              <div className="text-slate-500">Status: {job.status}</div>
+                            </div>
+                            <a
+                              href={statusUrl}
+                              className="text-indigo-600 hover:underline"
+                              data-testid={`client-login-job-link-${job.id}`}
+                            >
+                              Open status
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+
+      {/* Bottom portal & referral strip */}
+      <FooterPortals />
+      <Toaster />
+    </div>
+  );
+}
+
+
+// ------------------------
 // Operator portal
 // ------------------------
 
