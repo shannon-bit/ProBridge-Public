@@ -1397,6 +1397,19 @@ function OperatorDashboard() {
                             type="number"
                             value={quoteForm.unit_price_cents}
                             onChange={(e) => setQuoteForm((f) => ({ ...f, unit_price_cents: e.target.value }))}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 app-secondary-surface" data-testid="contractor-expansion-panel">
+                        <div className="flex flex-col gap-1">
+                          <div className="text-xs font-semibold text-slate-700">Want ProBridge in your city?</div>
+                          <p className="text-xs text-slate-600">
+                            Tell us where you work and we&apos;ll use it to plan future expansion.
+                          </p>
+                          <ContractorExpansionRequest />
+                        </div>
+                      </div>
+
                             data-testid="operator-quote-unit-price-input"
                           />
                         </div>
