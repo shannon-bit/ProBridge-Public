@@ -944,7 +944,7 @@ function OperatorLoginPage() {
 
   React.useEffect(() => {
     if (token) {
-      navigate("/operator/dashboard", { replace: true });
+      navigate("/operator/jobs", { replace: true });
     }
   }, [token, navigate]);
 
