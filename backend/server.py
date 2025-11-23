@@ -975,6 +975,12 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
 
     await db.jobs.update_one({"id": job_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}})
 
+    return ApproveQuoteResponse(
+        job_id=job_id,
+        quote_id=quote["id"],
+        checkout_url=checkout_url,
+        status=new_status
+    )
 
 
 class ClientJobsRequest(BaseModel):
