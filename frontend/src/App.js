@@ -2380,7 +2380,9 @@ function App() {
       <Routes>
         <Route path="/" element={<ClientHomePage />} />
         <Route path="/jobs/:jobId/status" element={<JobStatusPage />} />
+        <Route path="/client/login" element={<ClientLoginPage />} />
         <Route path="/operator/login" element={<OperatorLoginPage />} />
+        <Route path="/operator/jobs" element={<OperatorDashboard />} />
         <Route path="/operator/dashboard" element={<OperatorDashboard />} />
         <Route path="/contractor" element={<ContractorWelcomePage />} />
         <Route path="/contractor/login" element={<ContractorLoginPage />} />
