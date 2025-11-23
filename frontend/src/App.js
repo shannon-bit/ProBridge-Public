@@ -1783,6 +1783,95 @@ function ContractorSignupPage() {
                           <SelectItem key={c.id} value={c.slug} data-testid={`contractor-signup-city-${c.slug}`}>
                             {c.name}
                           </SelectItem>
+
+function ContractorExpansionRequest() {
+  const { toast } = useToast();
+  const { token } = useAuth("contractor_jwt");
+  const [city, setCity] = React.useState("");
+  const [zip, setZip] = React.useState("");
+  const [note, setNote] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!city.trim()) return;
+    setSubmitting(true);
+    try {
+      // Best-effort: fetch contractor profile if logged in so we can include email/phone
+      let email;
+      let phone;
+      let service_type;
+      if (token) {
+        try {
+          const me = await axios.get("/contractors/me/jobs", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          // We don&apos;t have a dedicated profile endpoint; fall back to token-only expansion
+        } catch (err) {
+          console.error("Optional contractor context fetch failed", err);
+        }
+      }
+
+      await axios.post("/expansion-requests", {
+        role: "contractor",
+        email: email || undefined,
+        phone: phone || undefined,
+        requested_city: city.trim(),
+        zip: zip || undefined,
+        service_type: service_type || undefined,
+        note: note || undefined,
+      });
+      toast({
+        title: "Thanks for your interest!",
+        description: "We&apos;ll keep your city in mind as we expand.",
+      });
+      setCity("");
+      setZip("");
+      setNote("");
+    } catch (err) {
+      console.error("Contractor expansion request failed", err);
+      toast({
+        title: "Could not send request",
+        description: "Please try again in a moment.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-2" data-testid="contractor-expansion-form">
+      <Input
+        placeholder="City or region"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        data-testid="contractor-expansion-city-input"
+      />
+      <Input
+        placeholder="ZIP (optional)"
+        value={zip}
+        onChange={(e) => setZip(e.target.value)}
+        data-testid="contractor-expansion-zip-input"
+      />
+      <Textarea
+        rows={2}
+        placeholder="Optional note (e.g., I&apos;m a licensed electrician in Santa Fe.)"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        data-testid="contractor-expansion-note-input"
+      />
+      <Button
+        type="submit"
+        size="sm"
+        disabled={submitting || !city.trim()}
+        data-testid="contractor-expansion-submit-button"
+      >
+        {submitting ? "Sending…" : "Request ProBridge in my area"}
+      </Button>
+    </form>
+  );
+}
+
                         ))}
                       </SelectContent>
                     </Select>
