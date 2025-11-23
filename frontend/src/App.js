@@ -958,7 +958,7 @@ function OperatorLoginPage() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
       saveToken(res.data.access_token);
-      navigate("/operator/dashboard", { replace: true });
+      navigate("/operator/jobs", { replace: true });
     } catch (err) {
       console.error("Operator login failed", err);
       toast({ title: "Login failed", description: "Check your credentials and role." });
