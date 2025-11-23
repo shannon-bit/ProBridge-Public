@@ -291,6 +291,11 @@ async def get_pricing_suggestion(city_slug: str, service_category_slug: str, des
 
 
 async def ensure_seed_data() -> None:
+    """Seed minimal reference data and operator accounts.
+
+    This runs on startup and must be idempotent and safe even when collections
+    already contain data (e.g., on Atlas with existing cities/categories).
+    """
     # Cities
     if await db.cities.count_documents({}) == 0:
         await db.cities.insert_many(
@@ -317,6 +322,7 @@ async def ensure_seed_data() -> None:
         for c in cats:
             c["id"] = str(uuid.uuid4())
             c["base_pricing_rule_id"] = None
+        await db.service_categories.insert_many(cats)
 
     # Seed a default operator user if none exists (for initial launch/testing)
     if await db.users.count_documents({"role": "operator"}) == 0:
@@ -350,10 +356,6 @@ async def ensure_seed_data() -> None:
             "last_login_at": None,
         }
         await db.users.insert_one(primary_operator)
-
-
-
-        await db.service_categories.insert_many(cats)
 
 
 class PricingSuggestion(BaseModel):
