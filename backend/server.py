@@ -913,7 +913,6 @@ async def approve_quote(job_id: str, token: str = Body(..., embed=True), request
 
     if PAYMENT_MODE == "stripe":
         # Create Stripe Checkout session
-        payment_mode = "stripe"
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="payment",
