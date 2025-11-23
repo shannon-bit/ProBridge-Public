@@ -671,34 +671,68 @@ function JobStatusPage() {
 
                   {job.status === "awaiting_payment" && (
                     <div className="mt-2 space-y-2" data-testid="job-awaiting-payment-copy">
-                      <div className="text-xs text-slate-600 space-y-1">
-                        <p>
-                          Your quote is approved. To confirm your booking, please send payment via Zelle using the details
-                          below.
-                        </p>
-                        <p>
-                          <span className="font-semibold">Amount:</span> ${" "}
-                          {(job.quote_total_cents / 100).toFixed(2)} USD
-                        </p>
-                        <p>
-                          <span className="font-semibold">Zelle:</span> {process.env.REACT_APP_ZELLE_PHONE || "505-645-4772"}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Memo:</span> Job ID {job.id}
-                        </p>
-                        <div className="mt-1 flex flex-col items-start gap-1">
-                          <span className="text-[11px] text-slate-500">Optional: scan this QR for your notes app or bank.</span>
-                          <div className="bg-white p-2 rounded border border-slate-200" data-testid="offline-payment-qr">
-                            <QRCodeCanvas
-                              value={`Pay via Zelle\nTo: ${process.env.REACT_APP_ZELLE_PHONE || "505-645-4772"}\nAmount: $${(
-                                job.quote_total_cents / 100
-                              ).toFixed(2)}\nMemo: Job ID ${job.id}`}
-                              size={96}
-                              includeMargin={false}
-                            />
+                      <p className="text-xs font-semibold text-slate-700">
+                        Final Step: Confirm Your Booking
+                      </p>
+                      <p className="text-xs text-slate-600">
+                        To confirm your booking, send your payment using one of the options below.
+                      </p>
+
+                      <div className="text-xs text-slate-600 space-y-2">
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold text-slate-700">
+                            Option 1  Pay with Zelle
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Use your banking app with Zelle to send your payment.
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Send Zelle payment to: <span className="font-semibold">shannon.laine.watson@gmail.com</span>
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            <span className="font-semibold">Amount:</span> ${" "}
+                            {(job.quote_total_cents / 100).toFixed(2)} USD
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            <span className="font-semibold">Memo:</span> Job ID {job.id}
+                          </p>
+                          <div className="mt-1 flex flex-col items-start gap-1">
+                            <span className="text-[11px] text-slate-500">
+                              Optional: scan this QR for your notes app or bank.
+                            </span>
+                            <div className="bg-white p-2 rounded border border-slate-200" data-testid="offline-payment-qr">
+                              <QRCodeCanvas
+                                value={`Pay via Zelle\nTo: ${process.env.REACT_APP_ZELLE_PHONE || "505-645-4772"}\nAmount: $${(
+                                  job.quote_total_cents / 100
+                                ).toFixed(2)}\nMemo: Job ID ${job.id}`}
+                                size={96}
+                                includeMargin={false}
+                              />
+                            </div>
                           </div>
                         </div>
+
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold text-slate-700">
+                            Option 2  Pay with Apple Cash (iPhone Only)
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            If youre on an iPhone, you can send Apple Cash from the Messages app.
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Send Apple Cash to: <span className="font-semibold">shannon.laine.watson@gmail.com</span> (Apple ID)
+                          </p>
+                          <ul className="list-disc ml-4 text-xs text-slate-600 space-y-1">
+                            <li>Open the Messages app.</li>
+                            <li>
+                              Start a message to <span className="font-semibold">shannon.laine.watson@gmail.com</span>.
+                            </li>
+                            <li>Tap the + button and choose Apple Cash.</li>
+                            <li>Enter your invoice total and send.</li>
+                          </ul>
+                        </div>
                       </div>
+
                       <Button
                         variant="outline"
                         size="xs"
