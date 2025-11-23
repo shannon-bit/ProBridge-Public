@@ -1258,6 +1258,29 @@ async def contractor_mark_complete(
 
 
 # ---------------------------
+# Expansion requests (clients + contractors)
+
+
+class ExpansionRequest(BaseModel):
+    role: Literal["client", "contractor"]
+    email: EmailStr
+    phone: Optional[str] = None
+    requested_city: str
+    zip: Optional[str] = None
+    service_type: Optional[str] = None
+    note: Optional[str] = None
+
+
+@api_router.post("/expansion-requests")
+async def create_expansion_request(body: ExpansionRequest):
+    doc = body.model_dump()
+    # Use timezone-aware now for Mongo compatibility with rest of codebase
+    doc["created_at"] = datetime.now(timezone.utc)
+    await db.expansion_requests.insert_one(doc)
+    return {"ok": True}
+
+
+
 # Operator routes
 # ---------------------------
 
