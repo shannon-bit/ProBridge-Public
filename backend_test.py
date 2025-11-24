@@ -907,9 +907,19 @@ if __name__ == "__main__":
         print("=" * 30)
         health_results = []
         
-        # Test health endpoint
+        # Test health endpoint (on main app, not /api)
         client = ProBridgeTestClient()
-        health_result = client.test_endpoint('GET', '/health')
+        health_url = BASE_URL.replace('/api', '') + '/health'
+        try:
+            response = client.session.get(health_url, timeout=30)
+            health_result = {
+                "success": response.status_code < 400,
+                "status_code": response.status_code,
+                "data": response.json() if response.content else {},
+                "error": None if response.status_code < 400 else f"HTTP {response.status_code}: {response.text[:500]}"
+            }
+        except Exception as e:
+            health_result = {"success": False, "error": f"Request failed: {str(e)}"}
         health_results.append(("GET /health", health_result))
         
         if health_result["success"]:
