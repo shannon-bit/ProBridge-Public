@@ -867,8 +867,6 @@ function JobStatusPage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1034,8 +1032,6 @@ function ClientLoginPage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1093,8 +1089,6 @@ function OperatorLoginPage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1573,8 +1567,6 @@ function OperatorDashboard() {
         )}
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1627,8 +1619,6 @@ function ContractorWelcomePage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -1688,8 +1678,6 @@ function ContractorLoginPage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -2100,8 +2088,6 @@ function ContractorExpansionRequest() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -2296,8 +2282,6 @@ function ContractorDashboard() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
@@ -2575,8 +2559,6 @@ function ReferralPage() {
         </section>
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
