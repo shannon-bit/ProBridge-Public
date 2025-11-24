@@ -161,6 +161,7 @@ function FooterPortals() {
 function ClientHomePage() {
   const { toast } = useToast();
   const { cities, categories, loading } = useCitiesAndCategories();
+  const [activeAudience, setActiveAudience] = React.useState("homeowner");
   const [form, setForm] = React.useState({
     city_slug: "",
     service_category_slug: "",
