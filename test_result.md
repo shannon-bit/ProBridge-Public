@@ -105,11 +105,11 @@
 ## backend:
   - task: "Core money loop: client job -> operator quote (estimator) -> client approval/payment -> contractor flow"
     implemented: true
-    working: false
+    working: true
     file: "backend/server.py"
-    stuck_count: 2
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
