@@ -256,8 +256,8 @@ function ClientHomePage() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <div className="app-header-title">Request a service with ProBridge</div>
-          <div className="app-tagline">Tell us about your project. We’re here to help!</div>
+          <div className="app-header-title">ProBridge – Home services in ABQ</div>
+          <div className="app-tagline">One place to ask for help, connect with local pros, and manage your jobs.</div>
         </div>
       </header>
 
@@ -265,19 +265,14 @@ function ClientHomePage() {
         <section className="app-hero-grid">
           <div>
             <div className="app-hero-title" data-testid="hero-main-title">
-              ProBridge connects you with trusted local pros.
+              Tell us what you need. We’ll take it from there.
             </div>
             <p className="app-hero-subtitle" data-testid="hero-subtitle">
-              Share a few details and we’ll route your request to a vetted contractor.
+              Start with a simple request. We’ll follow up by text or email.
             </p>
             <div className="app-hero-chip-row">
               <span className="app-hero-chip" data-testid="chip-city">Starting in Albuquerque</span>
               <span className="app-hero-chip" data-testid="chip-handyman">Home services first</span>
-              <span className="app-hero-chip" data-testid="chip-operator">Operator-managed quotes & routing</span>
-            </div>
-
-            <div className="app-secondary-surface" data-testid="info-sandbox">
-              <strong>Test request.</strong> You can mark this as a test at the bottom of the form if you’re just trying things out.
             </div>
           </div>
           <div className="app-hero-image-wrapper">
@@ -289,259 +284,332 @@ function ClientHomePage() {
           </div>
         </section>
 
-        <section>
-          <div className="app-panel" data-testid="client-job-request-panel">
-            <div className="app-panel-header">
-              <div>
-                <div className="app-panel-title">Service details</div>
-                <div className="app-panel-subtitle">We’ll use this to match you to the right pro.</div>
-              </div>
-            </div>
+        {/* Audience pills */}
+        <section className="mt-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setActiveAudience("homeowner")}
+            >
+              For homeowners
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setActiveAudience("contractor")}
+            >
+              For local pros
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setActiveAudience("operator")}
+            >
+              For Shannon / operator
+            </Button>
+          </div>
+          <p className="mt-2 text-[11px] text-slate-500">
+            Or email <a href="mailto:shannon@probridge.space" className="underline">shannon@probridge.space</a> and we&apos;ll get back to you.
+          </p>
+        </section>
 
-            <form onSubmit={handleSubmit} className="space-y-3" data-testid="job-request-form">
-              <div className="app-input-row">
+        {/* Homeowner request form */}
+        {activeAudience === "homeowner" && (
+          <section className="mt-6">
+            <div className="app-panel" data-testid="client-job-request-panel">
+              <div className="app-panel-header">
                 <div>
-                  <label className="text-xs text-slate-600" htmlFor="city" data-testid="label-city">
-                    Select your city
-                  </label>
-                  <Select
-                    onValueChange={(v) => onChange("city_slug")({ target: { value: v } })}
-                    value={form.city_slug}
-                  >
-                    <SelectTrigger id="city" data-testid="input-city">
-                      <SelectValue placeholder={loading ? "Loading cities…" : "Choose your city…"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((c) => (
-                        <SelectItem key={c.id} value={c.slug} data-testid={`input-city-option-${c.slug}`}>
-                          {c.name}
+                  <div className="app-panel-title">Request help with a home task</div>
+                  <div className="app-panel-subtitle">Share a few details and we&apos;ll follow up.</div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-3" data-testid="job-request-form">
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="city" data-testid="label-city">
+                      Select your city
+                    </label>
+                    <Select
+                      onValueChange={(v) => onChange("city_slug")({ target: { value: v } })}
+                      value={form.city_slug}
+                    >
+                      <SelectTrigger id="city" data-testid="input-city">
+                        <SelectValue placeholder={loading ? "Loading cities…" : "Choose your city…"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((c) => (
+                          <SelectItem key={c.id} value={c.slug} data-testid={`input-city-option-${c.slug}`}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="expansion_other" data-testid="input-city-option-expansion-other">
+                          My city is not listed
                         </SelectItem>
-                      ))}
-                      <SelectItem value="expansion_other" data-testid="input-city-option-expansion-other">
-                        My city is not listed
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="category" data-testid="label-category">
+                      What kind of help do you need?
+                    </label>
+                    <Select
+                      onValueChange={(v) => onChange("service_category_slug")({ target: { value: v } })}
+                      value={form.service_category_slug}
+                    >
+                      <SelectTrigger id="category" data-testid="input-category">
+                        <SelectValue placeholder={loading ? "Loading services…" : "Pick a service…"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regularCategories.map((s) => (
+                          <SelectItem key={s.id} value={s.slug} data-testid={`input-category-option-${s.slug}`}>
+                            {s.display_name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="other" data-testid="input-category-option-other">
+                          Other (describe below)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs text-slate-600" htmlFor="category" data-testid="label-category">
-                    What kind of help do you need?
-                  </label>
-                  <Select
-                    onValueChange={(v) => onChange("service_category_slug")({ target: { value: v } })}
-                    value={form.service_category_slug}
-                  >
-                    <SelectTrigger id="category" data-testid="input-category">
-                      <SelectValue placeholder={loading ? "Loading services…" : "Pick a service…"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regularCategories.map((s) => (
-                        <SelectItem key={s.id} value={s.slug} data-testid={`input-category-option-${s.slug}`}>
-                          {s.display_name}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="other" data-testid="input-category-option-other">
-                        Other (describe below)
-                      </SelectItem>
+                {form.city_slug === "expansion_other" && (
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="expansion-city-override" data-testid="label-expansion-city">
+                      Where are you located?
+                    </label>
+                    <Input
+                      id="expansion-city-override"
+                      data-testid="input-expansion-city"
+                      placeholder="City or region (e.g., Santa Fe, NM)"
+                      value={expansionCityOverride}
+                      onChange={(e) => setExpansionCityOverride(e.target.value)}
+                    />
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      We&apos;ll use this to plan future ProBridge expansion.
+                    </p>
+                  </div>
+                )}
 
-              {form.city_slug === "expansion_other" && (
+                {form.service_category_slug === "other" && (
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="other-desc" data-testid="label-other-description">
+                      Describe your request
+                    </label>
+                    <Textarea
+                      id="other-desc"
+                      rows={3}
+                      placeholder="Share what you need if it’s not listed above."
+                      value={otherDescription}
+                      onChange={(e) => setOtherDescription(e.target.value)}
+                      data-testid="input-other-description"
+                    />
+                  </div>
+                )}
+
                 <div>
-                  <label className="text-xs text-slate-600" htmlFor="expansion-city-override" data-testid="label-expansion-city">
-                    Where are you located?
+                  <label className="text-xs text-slate-600" htmlFor="title" data-testid="label-title">
+                    Give your request a title (optional)
                   </label>
                   <Input
-                    id="expansion-city-override"
-                    data-testid="input-expansion-city"
-                    placeholder="City or region (e.g., Santa Fe, NM)"
-                    value={expansionCityOverride}
-                    onChange={(e) => setExpansionCityOverride(e.target.value)}
+                    id="title"
+                    data-testid="input-title"
+                    placeholder="e.g., Mount a TV"
+                    value={form.title}
+                    onChange={onChange("title")}
                   />
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    We&apos;ll use this to plan future ProBridge expansion.
-                  </p>
                 </div>
-              )}
 
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {form.service_category_slug === "other" && (
                 <div>
-                  <label className="text-xs text-slate-600" htmlFor="other-desc" data-testid="label-other-description">
-                    Describe your request
+                  <label className="text-xs text-slate-600" htmlFor="description" data-testid="label-description">
+                    Describe the job
                   </label>
                   <Textarea
-                    id="other-desc"
-                    rows={3}
-                    placeholder="Share what you need if it’s not listed above."
-                    value={otherDescription}
-                    onChange={(e) => setOtherDescription(e.target.value)}
-                    data-testid="input-other-description"
+                    id="description"
+                    data-testid="input-description"
+                    placeholder="Provide any details our pros should know…"
+                    rows={4}
+                    value={form.description}
+                    onChange={onChange("description")}
                   />
                 </div>
-              )}
 
-              <div>
-                <label className="text-xs text-slate-600" htmlFor="title" data-testid="label-title">
-                  Give your request a title (optional)
-                </label>
-                <Input
-                  id="title"
-                  data-testid="input-title"
-                  placeholder="e.g., Mount a TV"
-                  value={form.title}
-                  onChange={onChange("title")}
-                />
-              </div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="zip" data-testid="label-zip">
+                      Where are you located?
+                    </label>
+                    <Input
+                      id="zip"
+                      data-testid="input-zip"
+                      placeholder="ZIP code or full address…"
+                      value={form.zip}
+                      onChange={onChange("zip")}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="timing" data-testid="label-preferred-timing">
+                      Preferred timing
+                    </label>
+                    <Select
+                      onValueChange={(v) => onChange("preferred_timing")({ target: { value: v } })}
+                      value={form.preferred_timing}
+                    >
+                      <SelectTrigger id="timing" data-testid="input-preferred-timing">
+                        <SelectValue placeholder="Pick a date or time range…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asap" data-testid="input-preferred-timing-asap">
+                          ASAP
+                        </SelectItem>
+                        <SelectItem value="today" data-testid="input-preferred-timing-today">
+                          Today
+                        </SelectItem>
+                        <SelectItem value="this_week" data-testid="input-preferred-timing-this_week">
+                          This week
+                        </SelectItem>
+                        <SelectItem value="flexible" data-testid="input-preferred-timing-flexible">
+                          Flexible
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-              <div>
-                <label className="text-xs text-slate-600" htmlFor="description" data-testid="label-description">
-                  Describe the job
-                </label>
-                <Textarea
-                  id="description"
-                  data-testid="input-description"
-                  placeholder="Provide any details our pros should know…"
-                  rows={4}
-                  value={form.description}
-                  onChange={onChange("description")}
-                />
-              </div>
+                <div className="app-divider-label">Contact information</div>
+                <div className="app-input-row">
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="client_name" data-testid="label-client-name">
+                      Your name
+                    </label>
+                    <Input
+                      id="client_name"
+                      data-testid="input-client-name"
+                      value={form.client_name}
+                      onChange={onChange("client_name")}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600" htmlFor="client_phone" data-testid="label-client-phone">
+                      Phone number
+                    </label>
+                    <Input
+                      id="client_phone"
+                      data-testid="input-client-phone"
+                      placeholder="We’ll send updates and a quote here."
+                      value={form.client_phone}
+                      onChange={onChange("client_phone")}
+                    />
+                  </div>
+                </div>
 
-              <div className="app-input-row">
                 <div>
-                  <label className="text-xs text-slate-600" htmlFor="zip" data-testid="label-zip">
-                    Where are you located?
+                  <label className="text-xs text-slate-600" htmlFor="client_email" data-testid="label-client-email">
+                    Email address
                   </label>
                   <Input
-                    id="zip"
-                    data-testid="input-zip"
-                    placeholder="ZIP code or full address…"
-                    value={form.zip}
-                    onChange={onChange("zip")}
+                    id="client_email"
+                    data-testid="input-client-email"
+                    type="email"
+                    value={form.client_email}
+                    onChange={onChange("client_email")}
                   />
+                  <p className="mt-1 text-[11px] text-slate-500" data-testid="contact-subtext">
+                    We’ll send updates and a quote here.
+                  </p>
                 </div>
-                <div>
-                  <label className="text-xs text-slate-600" htmlFor="timing" data-testid="label-preferred-timing">
-                    Preferred timing
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <label className="flex items-center gap-2 text-xs text-slate-600" data-testid="label-is-test">
+                    <input
+                      type="checkbox"
+                      checked={form.is_test}
+                      onChange={onChange("is_test")}
+                      className="h-3.5 w-3.5 rounded border-slate-300 bg-white"
+                      data-testid="input-is-test-toggle"
+                    />
+                    <span>Test request</span>
                   </label>
-                  <Select
-                    onValueChange={(v) => onChange("preferred_timing")({ target: { value: v } })}
-                    value={form.preferred_timing}
+                  <span className="text-[11px] text-slate-500" data-testid="sandbox-tooltip">
+                    Check this if you’re just trying out the system.
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pt-3">
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    data-testid="job-request-submit-button"
                   >
-                    <SelectTrigger id="timing" data-testid="input-preferred-timing">
-                      <SelectValue placeholder="Pick a date or time range…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="asap" data-testid="input-preferred-timing-asap">
-                        ASAP
-                      </SelectItem>
-                      <SelectItem value="today" data-testid="input-preferred-timing-today">
-                        Today
-                      </SelectItem>
-                      <SelectItem value="this_week" data-testid="input-preferred-timing-this_week">
-                        This week
-                      </SelectItem>
-                      <SelectItem value="flexible" data-testid="input-preferred-timing-flexible">
-                        Flexible
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {submitting ? "Submitting…" : "Submit my request"}
+                  </Button>
+
+                  {statusLink && (
+                    <a
+                      href={statusLink}
+                      className="text-xs text-indigo-600 hover:underline"
+                      data-testid="job-status-link"
+                    >
+                      Open status page
+                    </a>
+                  )}
                 </div>
-              </div>
-
-              <div className="app-divider-label">Contact information</div>
-              <div className="app-input-row">
-                <div>
-                  <label className="text-xs text-slate-600" htmlFor="client_name" data-testid="label-client-name">
-                    Your name
-                  </label>
-                  <Input
-                    id="client_name"
-                    data-testid="input-client-name"
-                    value={form.client_name}
-                    onChange={onChange("client_name")}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-600" htmlFor="client_phone" data-testid="label-client-phone">
-                    Phone number
-                  </label>
-                  <Input
-                    id="client_phone"
-                    data-testid="input-client-phone"
-                    placeholder="We’ll send updates and a quote here."
-                    value={form.client_phone}
-                    onChange={onChange("client_phone")}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-600" htmlFor="client_email" data-testid="label-client-email">
-                  Email address
-                </label>
-                <Input
-                  id="client_email"
-                  data-testid="input-client-email"
-                  type="email"
-                  value={form.client_email}
-                  onChange={onChange("client_email")}
-                />
-                <p className="mt-1 text-[11px] text-slate-500" data-testid="contact-subtext">
-                  We’ll send updates and a quote here.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 pt-1">
-                <label className="flex items-center gap-2 text-xs text-slate-600" data-testid="label-is-test">
-                  <input
-                    type="checkbox"
-                    checked={form.is_test}
-                    onChange={onChange("is_test")}
-                    className="h-3.5 w-3.5 rounded border-slate-300 bg-white"
-                    data-testid="input-is-test-toggle"
-                  />
-                  <span>Test request</span>
-                </label>
-                <span className="text-[11px] text-slate-500" data-testid="sandbox-tooltip">
-                  Check this if you’re just trying out the system.
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between pt-3">
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  data-testid="job-request-submit-button"
-                >
-                  {submitting ? "Submitting…" : "Submit my request"}
-                </Button>
-
                 {statusLink && (
-                  <a
-                    href={statusLink}
-                    className="text-xs text-indigo-600 hover:underline"
-                    data-testid="job-status-link"
-                  >
-                    Open status page
-                  </a>
+                  <p className="mt-1 text-[11px] text-slate-500" data-testid="status-link-hint">
+                    Tip: after opening the status page, add it to your home screen or bookmarks so you can return to it like an app.
+                  </p>
                 )}
-              <p className="mt-1 text-[11px] text-slate-500" data-testid="status-link-hint">
-                Tip: after opening the status page, add it to your home screen or bookmarks so you can return to it like an app.
-              </p>
+              </form>
+            </div>
+          </section>
+        )}
 
-              </div>
-            </form>
-          </div>
-        </section>
+        {/* Contractor interest section */}
+        {activeAudience === "contractor" && (
+          <section className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">For local pros</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-slate-700">
+                <p>
+                  If you&apos;re a local pro and want to hear about future jobs, send a quick email with your
+                  name, city, and the type of work you do.
+                </p>
+                <p>
+                  Email <a href="mailto:shannon@probridge.space" className="underline">shannon@probridge.space</a>
+                  {" "}with the subject line <span className="font-semibold">"Contractor interest"</span>.
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* Operator section */}
+        {activeAudience === "operator" && (
+          <section className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Operator access</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-slate-700">
+                <p>
+                  This section is just for Shannon to manage ProBridge jobs.
+                </p>
+                <p>
+                  <a href="/operator/login" className="text-indigo-600 underline">
+                    Go to operator login
+                  </a>
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+        )}
       </main>
 
-      {/* Bottom portal & referral strip */}
-      <FooterPortals />
       <Toaster />
     </div>
   );
