@@ -1,0 +1,6 @@
+ROUTES SPEC (TEXT MODE)
+
+Routes:
+- /status
+- /jobs/create
+- /jobs/list

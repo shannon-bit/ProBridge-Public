@@ -1,0 +1,6 @@
+SERVER SPEC (TEXT-ONLY SEED)
+
+Endpoints:
+1. GET /status
+2. POST /jobs/create
+3. GET /jobs/list

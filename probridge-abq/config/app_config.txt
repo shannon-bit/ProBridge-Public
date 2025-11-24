@@ -1,0 +1,2 @@
+APP CONFIG
+environment=production
