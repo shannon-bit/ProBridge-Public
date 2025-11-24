@@ -569,30 +569,395 @@ def print_test_summary(test_results):
         if result["success"]:
             print(f"   • {test_name}")
 
+def test_full_money_loop_with_shannon():
+    """
+    Test the complete money loop using Shannon's operator credentials as specified in the review.
+    Flow: client job creation -> operator quote creation -> client approval -> offline payment mark -> operator mark-paid
+    """
+    client = ProBridgeTestClient()
+    test_results = []
+    
+    print("\n💰 Testing Full Money Loop with Shannon's Credentials")
+    print("=" * 60)
+    
+    # Test data with clearly marked test identifiers
+    test_suffix = str(uuid.uuid4())[:8]
+    client_email = f"neo-e2e-test-client-{test_suffix}@example.com"
+    
+    # Store test state
+    test_state = {
+        "job_id": None,
+        "client_view_token": None,
+        "operator_token": None,
+        "quote_id": None
+    }
+    
+    # Step 1: Create a client job with NEO-E2E-TEST markers
+    print("\n👤 Step 1: Client Job Creation")
+    
+    job_data = {
+        "city_slug": "abq",
+        "service_category_slug": "handyman", 
+        "title": f"NEO-E2E-TEST Job {test_suffix}",
+        "description": f"NEO-E2E-TEST: Full money loop test - kitchen sink repair {test_suffix}",
+        "zip": "87101",
+        "preferred_timing": "this_week",
+        "client_name": f"NEO-E2E-TEST Client {test_suffix}",
+        "client_phone": f"505-{test_suffix[:4]}",
+        "client_email": client_email,
+        "is_test": True
+    }
+    
+    job_result = client.test_endpoint('POST', '/jobs', job_data)
+    test_results.append(("POST /jobs", job_result))
+    
+    if job_result["success"]:
+        print("✅ Job creation successful")
+        test_state["job_id"] = job_result["data"]["job_id"]
+        test_state["client_view_token"] = job_result["data"]["client_view_token"]
+        print(f"   Job ID: {test_state['job_id']}")
+        print(f"   Status: {job_result['data']['status']}")
+    else:
+        print(f"❌ Job creation failed: {job_result['error']}")
+        return test_results
+    
+    # Step 2: Operator login using Shannon's credentials
+    print("\n👨‍💼 Step 2: Operator Login (Shannon)")
+    
+    # Use Shannon's credentials as specified in the review
+    shannon_result = client.test_endpoint_form('POST', '/auth/login', {
+        "username": "shannon@probridge.space",
+        "password": "Y0ungin01@@"
+    })
+    test_results.append(("POST /auth/login (shannon@probridge.space)", shannon_result))
+    
+    if shannon_result["success"]:
+        print("✅ Shannon operator login successful")
+        test_state["operator_token"] = shannon_result["data"]["access_token"]
+    else:
+        print(f"❌ Shannon operator login failed: {shannon_result['error']}")
+        # Try fallback operator for testing
+        fallback_result = client.test_endpoint_form('POST', '/auth/login', {
+            "username": "testoperator@example.com",
+            "password": "testpass123"
+        })
+        test_results.append(("POST /auth/login (fallback operator)", fallback_result))
+        
+        if fallback_result["success"]:
+            print("✅ Fallback operator login successful")
+            test_state["operator_token"] = fallback_result["data"]["access_token"]
+        else:
+            print(f"❌ All operator logins failed")
+            return test_results
+    
+    # Step 3: Create quote (no Stripe)
+    print("\n💰 Step 3: Create Quote")
+    
+    if test_state["job_id"] and test_state["operator_token"]:
+        quote_data = {
+            "line_items": [
+                {
+                    "type": "base",
+                    "label": f"NEO-E2E-TEST Kitchen sink repair {test_suffix}",
+                    "quantity": 1,
+                    "unit_price_cents": 15000,  # $150.00
+                    "metadata": {"test": "neo-e2e-full-money-loop"}
+                }
+            ]
+        }
+        
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/quotes', 
+                                          quote_data, headers=auth_headers)
+        test_results.append(("POST /operator/jobs/{job_id}/quotes", quote_result))
+        
+        if quote_result["success"]:
+            print("✅ Quote creation successful")
+            test_state["quote_id"] = quote_result["data"]["id"]
+            print(f"   Quote ID: {test_state['quote_id']}")
+            print(f"   Total: ${quote_result['data']['total_price_cents'] / 100:.2f}")
+        else:
+            print(f"❌ Quote creation failed: {quote_result['error']}")
+            return test_results
+    
+    # Step 4: Send quote to client
+    print("\n📤 Step 4: Send Quote")
+    
+    if test_state["job_id"] and test_state["operator_token"]:
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        send_quote_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/send-quote',
+                                               headers=auth_headers)
+        test_results.append(("POST /operator/jobs/{job_id}/send-quote", send_quote_result))
+        
+        if send_quote_result["success"]:
+            print("✅ Quote sending successful")
+        else:
+            print(f"❌ Quote sending failed: {send_quote_result['error']}")
+            return test_results
+    
+    # Step 5: Client approves quote (triggers offline payment)
+    print("\n✅ Step 5: Client Approves Quote")
+    
+    if test_state["job_id"] and test_state["client_view_token"]:
+        approve_data = {"token": test_state["client_view_token"]}
+        approve_result = client.test_endpoint('POST', f'/jobs/{test_state["job_id"]}/approve-quote', approve_data)
+        test_results.append(("POST /jobs/{job_id}/approve-quote", approve_result))
+        
+        if approve_result["success"]:
+            print("✅ Quote approval successful")
+            print(f"   New status: {approve_result['data']['status']}")
+            
+            # Should transition to awaiting_payment for offline mode
+            if approve_result['data']['status'] == 'awaiting_payment':
+                print("✅ Job correctly transitioned to awaiting_payment")
+            else:
+                print(f"⚠️  Expected awaiting_payment, got {approve_result['data']['status']}")
+        else:
+            print(f"❌ Quote approval failed: {approve_result['error']}")
+            return test_results
+    
+    # Step 6: Client marks payment as sent (offline payment)
+    print("\n💳 Step 6: Client Marks Payment Sent")
+    
+    if test_state["job_id"] and test_state["client_view_token"]:
+        payment_data = {"token": test_state["client_view_token"]}
+        client_payment_result = client.test_endpoint('POST', f'/jobs/{test_state["job_id"]}/client-mark-payment-sent', 
+                                                   payment_data)
+        test_results.append(("POST /jobs/{job_id}/client-mark-payment-sent", client_payment_result))
+        
+        if client_payment_result["success"]:
+            print("✅ Client payment marking successful")
+            print(f"   Payment ID: {client_payment_result['data'].get('payment_id', 'N/A')}")
+        else:
+            print(f"❌ Client payment marking failed: {client_payment_result['error']}")
+    
+    # Step 7: Operator marks payment as received
+    print("\n💰 Step 7: Operator Marks Payment Received")
+    
+    if test_state["job_id"] and test_state["operator_token"]:
+        auth_headers = {"Authorization": f"Bearer {test_state['operator_token']}"}
+        mark_paid_result = client.test_endpoint('POST', f'/operator/jobs/{test_state["job_id"]}/mark-paid',
+                                              headers=auth_headers)
+        test_results.append(("POST /operator/jobs/{job_id}/mark-paid", mark_paid_result))
+        
+        if mark_paid_result["success"]:
+            print("✅ Operator payment marking successful")
+            print(f"   Payment status: {mark_paid_result['data'].get('status', 'N/A')}")
+        else:
+            print(f"❌ Operator payment marking failed: {mark_paid_result['error']}")
+    
+    # Step 8: Final status check
+    print("\n🔍 Step 8: Final Job Status Check")
+    
+    if test_state["job_id"] and test_state["client_view_token"]:
+        final_status_result = client.test_endpoint('GET', f'/jobs/{test_state["job_id"]}/status',
+                                                 params={"token": test_state["client_view_token"]})
+        test_results.append(("Final GET /jobs/{job_id}/status", final_status_result))
+        
+        if final_status_result["success"]:
+            print("✅ Final job status check successful")
+            final_status = final_status_result['data']['status']
+            print(f"   Final status: {final_status}")
+            
+            # Should be 'confirmed' after payment received
+            if final_status == 'confirmed':
+                print("✅ Full money loop completed successfully!")
+            else:
+                print(f"⚠️  Expected 'confirmed' status, got '{final_status}'")
+                
+            quote_total = final_status_result['data'].get('quote_total_cents')
+            if quote_total is not None:
+                print(f"   Quote total: ${quote_total / 100:.2f}")
+        else:
+            print(f"❌ Final job status check failed: {final_status_result['error']}")
+    
+    return test_results
+
+def test_contractor_helper_endpoints():
+    """
+    Smoke-test contractor and client helper endpoints as requested in the review.
+    """
+    client = ProBridgeTestClient()
+    test_results = []
+    
+    print("\n🔧 Testing Contractor & Client Helper Endpoints")
+    print("=" * 60)
+    
+    # Test contractor signup
+    print("\n👷 Step 1: Contractor Signup")
+    
+    test_suffix = str(uuid.uuid4())[:8]
+    contractor_email = f"neo-e2e-test-contractor-{test_suffix}@example.com"
+    
+    contractor_data = {
+        "name": f"NEO-E2E-TEST Contractor {test_suffix}",
+        "email": contractor_email,
+        "phone": f"505-{test_suffix[:4]}",
+        "password": "testpass123",
+        "city_slug": "abq",
+        "base_zip": "87101",
+        "radius_miles": 25,
+        "service_category_ids": ["handyman"],  # Will need to get actual IDs
+        "bio": f"NEO-E2E-TEST contractor bio {test_suffix}"
+    }
+    
+    # First get service categories to get real IDs
+    categories_result = client.test_endpoint('GET', '/meta/service-categories')
+    if categories_result["success"]:
+        categories = categories_result["data"]
+        handyman_cat = next((c for c in categories if c["slug"] == "handyman"), None)
+        if handyman_cat:
+            contractor_data["service_category_ids"] = [handyman_cat["id"]]
+    
+    contractor_signup_result = client.test_endpoint('POST', '/contractors/signup', contractor_data)
+    test_results.append(("POST /contractors/signup", contractor_signup_result))
+    
+    contractor_id = None
+    if contractor_signup_result["success"]:
+        print("✅ Contractor signup successful")
+        contractor_id = contractor_signup_result["data"]["contractor_id"]
+        print(f"   Contractor ID: {contractor_id}")
+    else:
+        print(f"❌ Contractor signup failed: {contractor_signup_result['error']}")
+    
+    # Test contractor login
+    print("\n🔑 Step 2: Contractor Login")
+    
+    contractor_login_result = client.test_endpoint_form('POST', '/auth/login', {
+        "username": contractor_email,
+        "password": "testpass123"
+    })
+    test_results.append(("POST /auth/login (contractor)", contractor_login_result))
+    
+    contractor_token = None
+    if contractor_login_result["success"]:
+        print("✅ Contractor login successful")
+        contractor_token = contractor_login_result["data"]["access_token"]
+    else:
+        print(f"❌ Contractor login failed: {contractor_login_result['error']}")
+    
+    # Test contractor jobs endpoint (once a job is assigned)
+    print("\n📋 Step 3: Contractor Jobs")
+    
+    if contractor_token:
+        auth_headers = {"Authorization": f"Bearer {contractor_token}"}
+        contractor_jobs_result = client.test_endpoint('GET', '/contractors/me/jobs', headers=auth_headers)
+        test_results.append(("GET /contractors/me/jobs", contractor_jobs_result))
+        
+        if contractor_jobs_result["success"]:
+            print("✅ Contractor jobs endpoint working")
+            jobs = contractor_jobs_result["data"]
+            print(f"   Found {len(jobs)} assigned jobs")
+        else:
+            print(f"❌ Contractor jobs endpoint failed: {contractor_jobs_result['error']}")
+    
+    # Test client jobs helper endpoint
+    print("\n👤 Step 4: Client Jobs Helper")
+    
+    # Use the email from the full money loop test
+    test_suffix_client = str(uuid.uuid4())[:8]
+    client_email = f"neo-e2e-test-client-{test_suffix_client}@example.com"
+    
+    # First create a job for this client
+    job_data = {
+        "city_slug": "abq",
+        "service_category_slug": "handyman", 
+        "title": f"NEO-E2E-TEST Client Helper Job {test_suffix_client}",
+        "description": f"NEO-E2E-TEST: Client helper endpoint test {test_suffix_client}",
+        "zip": "87101",
+        "preferred_timing": "flexible",
+        "client_name": f"NEO-E2E-TEST Client Helper {test_suffix_client}",
+        "client_phone": f"505-{test_suffix_client[:4]}",
+        "client_email": client_email,
+        "is_test": True
+    }
+    
+    job_create_result = client.test_endpoint('POST', '/jobs', job_data)
+    test_results.append(("POST /jobs (for client helper test)", job_create_result))
+    
+    if job_create_result["success"]:
+        print("✅ Test job created for client helper test")
+        
+        # Now test the client jobs helper endpoint
+        client_jobs_data = {"email": client_email}
+        client_jobs_result = client.test_endpoint('POST', '/client/jobs', client_jobs_data)
+        test_results.append(("POST /client/jobs", client_jobs_result))
+        
+        if client_jobs_result["success"]:
+            print("✅ Client jobs helper endpoint working")
+            client_jobs = client_jobs_result["data"]
+            print(f"   Found {len(client_jobs)} jobs for client")
+            if client_jobs:
+                print(f"   Latest job: {client_jobs[0]['id']} (status: {client_jobs[0]['status']})")
+        else:
+            print(f"❌ Client jobs helper endpoint failed: {client_jobs_result['error']}")
+    else:
+        print(f"❌ Test job creation failed: {job_create_result['error']}")
+    
+    return test_results
+
 if __name__ == "__main__":
     try:
-        print("🚀 ProBridge Backend - Operator Quote Creation Test")
+        print("🚀 ProBridge Backend - Full E2E Testing")
         print(f"Testing against: {BASE_URL}")
         print("=" * 60)
         
-        # Focus on the specific operator quote creation endpoint test
-        quote_test_results = test_operator_quote_creation()
+        # Test 1: Health endpoints
+        print("\n🏥 Health Check")
+        print("=" * 30)
+        health_results = []
         
-        print_test_summary(quote_test_results)
+        # Test health endpoint
+        client = ProBridgeTestClient()
+        health_result = client.test_endpoint('GET', '/health')
+        health_results.append(("GET /health", health_result))
         
-        # Also run basic sanity check to ensure backend is responsive
-        print("\n" + "=" * 60)
-        print("🔍 Basic Backend Health Check")
-        print("=" * 60)
+        if health_result["success"]:
+            print("✅ Health endpoint working")
+        else:
+            print(f"❌ Health endpoint failed: {health_result['error']}")
+        
+        # Test root endpoint
+        root_result = client.test_endpoint('GET', '/')
+        health_results.append(("GET / (api root)", root_result))
+        
+        if root_result["success"]:
+            print("✅ API root endpoint working")
+        else:
+            print(f"❌ API root endpoint failed: {root_result['error']}")
+        
+        # Test 2: Full money loop with Shannon's credentials
+        money_loop_results = test_full_money_loop_with_shannon()
+        
+        # Test 3: Contractor and client helper endpoints
+        helper_results = test_contractor_helper_endpoints()
+        
+        # Test 4: Basic startup sanity
+        print("\n🔍 Basic Backend Health Check")
+        print("=" * 40)
         startup_results = test_basic_startup_sanity()
         
         # Combine all results for final summary
-        all_results = quote_test_results + startup_results
+        all_results = health_results + money_loop_results + helper_results + startup_results
         
         print("\n" + "=" * 60)
-        print("📊 FINAL COMPREHENSIVE SUMMARY")
+        print("📊 FINAL COMPREHENSIVE E2E TEST SUMMARY")
         print("=" * 60)
         print_test_summary(all_results)
+        
+        # Check for critical failures
+        critical_failures = []
+        for test_name, result in all_results:
+            if not result["success"] and any(keyword in test_name.lower() for keyword in 
+                                           ["quote", "money", "payment", "health", "jobs"]):
+                critical_failures.append((test_name, result["error"]))
+        
+        if critical_failures:
+            print("\n🚨 CRITICAL FAILURES DETECTED:")
+            for test_name, error in critical_failures:
+                print(f"   • {test_name}: {error}")
+        else:
+            print("\n✅ NO CRITICAL FAILURES - Core money loop appears functional!")
         
     except Exception as e:
         print(f"\n💥 Test execution failed: {str(e)}")
